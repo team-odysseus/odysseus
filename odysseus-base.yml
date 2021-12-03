@@ -54,5 +54,6 @@ dependencies:
       - opt-einsum~=3.3.0
       - datetimerange>=1.0.0
       - pyTelegramBotAPI>=4.2.0
+      - python-telegram-bot
 
 prefix: /home/cubecloud/anaconda3/envs/odysseus-base
