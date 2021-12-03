@@ -137,14 +137,13 @@ def cancel(update: Update, context: CallbackContext) -> int:
 
 
 def main() -> None:
-    a = load_dotenv(find_dotenv())
+    load_dotenv(find_dotenv())
     name = 'OD_BOT_TOKEN'
     my_token = os.environ.get(name)
-    print(my_token)
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
 
-    updater = Updater("2115079379:AAEGI-gYvhoCnI48MefArKeU_f6yLkhmnEw")
+    updater = Updater(my_token)
 
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
@@ -153,13 +152,7 @@ def main() -> None:
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
-            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)],
-            PHOTO: [MessageHandler(Filters.photo, photo), CommandHandler('skip', skip_photo)],
-            LOCATION: [
-                MessageHandler(Filters.location, location),
-                CommandHandler('skip', skip_location),
-            ],
-            BIO: [MessageHandler(Filters.text & ~Filters.command, bio)],
+            GENDER: [MessageHandler(Filters.regex('^(Boy|Girl|Other)$'), gender)]
         },
         fallbacks=[CommandHandler('cancel', cancel)],
     )
