@@ -2,7 +2,7 @@ import telebot
 # from telebot import apihelper
 import time
 
-TOKEN = '5098876489:AAFkAk8pJJnBH6Lfu6xcJglw_gQZm9OJzA0'
+
 
 # proxies = {
 #     'http': 'http://51.158.98.121:8811',
