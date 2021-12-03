@@ -15,6 +15,9 @@ bot.
 
 import logging
 
+from dotenv import load_dotenv, find_dotenv
+import os
+
 from telegram import ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     Updater,
@@ -134,8 +137,13 @@ def cancel(update: Update, context: CallbackContext) -> int:
 
 
 def main() -> None:
+    a = load_dotenv(find_dotenv())
+    name = 'OD_BOT_TOKEN'
+    my_token = os.environ.get(name)
+    print(my_token)
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
+
     updater = Updater("2115079379:AAEGI-gYvhoCnI48MefArKeU_f6yLkhmnEw")
 
     # Get the dispatcher to register handlers
