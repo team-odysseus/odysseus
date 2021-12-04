@@ -18,7 +18,8 @@ class LoadData:
                                        'not_correct_1',
                                        'not_correct_2',
                                        'not_correct_3',
-                                       'not_correct_4'
+                                       'not_correct_4',
+                                       'comment'
                                        ],
                               index_col='index'
                               )

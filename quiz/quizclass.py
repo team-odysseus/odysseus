@@ -3,8 +3,9 @@ import numpy as np
 import pandas as pd
 from typing import Tuple
 from storage.database import LoadData
+from PIL import Image, ImageDraw, ImageFont
 
-__version_ = 0.0010
+__version_ = 0.0011
 
 
 class Quiz(object):
@@ -66,11 +67,6 @@ class Quiz(object):
             cat_questions = self.get_one_cat_questions(cat_num)
             cat_questions_idxs = cat_questions.index.tolist()
             self.all_categories_questions.append(cat_questions)
-            # q_a_dict: dict = {}
-            # for idx in cat_questions.index:
-            #     """ creating dictionary for user answers """
-            #     q_a_dict.update({idx: -1})
-            # self.user_all_q_a.update({cat_num: q_a_dict})
             all_categories_questions_idxs.append(cat_questions_idxs)
         self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
@@ -149,14 +145,37 @@ class Quiz(object):
     def get_user_stats(self):
         return self.user_route, self.user_score
 
+    def get_board_pic(self, pic_matrix):
+        h, k = 300, 7
+        step = int(h / 5)
+        w = step * k
+        im = Image.new('RGB', (w, h), (49, 140, 231))
+        draw = ImageDraw.Draw(im)
+        font_size = 12
+        unicode_font = ImageFont.truetype("DejaVuSans.ttf", font_size)
+
+        for i in range(0, 6):
+            draw.line((0, step * i, w, step * i), fill='white', width=1)
+            for i in range(3, k + 1):
+                draw.line((step * i - 1, 0, step * i - 1, h), fill='white', width=1)
+                draw.line((0, 0, 0, h), fill='white', width=1)
+
+        for cat, i in zip(pic_matrix, range(0, k)):
+            draw.text((10, step * i + int(step / 2) - 5), str(cat[0]), font=unicode_font, fill=(255, 255, 255, 0))
+            for question, n in zip(cat[1:], range(3, k + 1)):
+                draw.text((step * n + int(step / 2) - 5, step * i + int(step / 2) - 5), str(question), font=unicode_font,
+                          fill=(243, 244, 175, 0))
+
+        return im
 
 if __name__ == "__main__":
     q = Quiz()
-    # q.choose_categories()
-    # q.prepare_questions()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
     pic_list, _ = q.create_rows_cols_pic_box()
+    pic = q.get_board_pic(pic_list)
+    pic.show()
     print(q.get_question_and_answers(2, 3))
     print(q.check_answer(2, 3, 2))
     print(pic_list)
+    print()
