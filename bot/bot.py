@@ -83,7 +83,7 @@ def send_message(user_id, text, buttons=None):
         logger.error("Failed to send message to " + str(user_id) + " " + text)
 
 
-def main() -> None:
+def bot_main() -> None:
     load_dotenv(find_dotenv())
     name = 'OD_BOT_TOKEN'
     my_token = os.environ.get(name)
@@ -112,4 +112,4 @@ def main() -> None:
 
 
 if __name__ == '__main__':
-    main()
+    bot_main()
