@@ -1,10 +1,12 @@
 from PIL import Image, ImageDraw, ImageFont
 
-'''category_list = [['Team 1', 100, 200, 300, 400],
+def get_test_category():
+ category_list = [['Team 1', 100, 200, 300, 400],
      ['Team 2', 100, 200, 300, 400],
      ['Team 3', 100, '', 300, 400],
      ['Team 4', 100, 200, '', 400],
-     ['Team 5', '', 200, 300, 400]]'''
+     ['Team 5', '', 200, 300, 400]]
+ return category_list
 
 
 def get_table_board(category_list):
