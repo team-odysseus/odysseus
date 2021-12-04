@@ -1,9 +1,9 @@
 import logging
 
-import role
-from player import Player
-from round import Round
-import communications
+import game.role as role
+import game.communications as communications
+from game.player import Player
+from game.round import Round
 
 MAX_PLAYERS = 2
 
@@ -59,6 +59,7 @@ class Game:
                 self.update_stats(p.role, p.iq, choice)
         if len(self.history[self.round_index]) == len(self.players):
             self.round_results()
+            self.advance_round()
 
     def update_stats(self, p_role, p_iq, choice: int):
         for stat, increment in self.current_round.get_choice_stat(p_role, choice).items():
@@ -72,6 +73,7 @@ class Game:
             self.announce_round()
         else:
             self.current_round = None
+            self.finish()
 
     def is_over(self):
         return self.round_index >= len(self.rounds)

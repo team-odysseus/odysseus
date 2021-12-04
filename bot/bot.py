@@ -35,9 +35,15 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 bot = None
+controller = None
 
 # Map from user_id to chat_id with this user.
 chats = dict()
+
+
+def set_bot_controller(_controller):
+    global controller
+    controller = _controller
 
 
 def start(update: Update, context: CallbackContext) -> int:
