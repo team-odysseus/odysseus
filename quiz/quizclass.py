@@ -3,17 +3,22 @@ import numpy as np
 import pandas as pd
 from storage.database import LoadData
 
-__version_ = 0.0005
+__version_ = 0.0006
 
 
 class Quiz(object):
-    def __init__(self, name_quiz_data_file, categories_num: int = 5):
+    def __init__(self,
+                 name_quiz_data_file,
+                 categories_num: int = 5):
         self.ld = LoadData(name_quiz_data_file)
         self.categories_num: int = categories_num
         self.unq_categories = np.arange(self.categories_num)
         self.all_categories_questions: list = []
-        self.all_categories_questions_idxs: np.array = np.zeros([4, 5])
+        self.q_a_matrix_rows = categories_num
+        self.q_a_matrix_cols = 4
+        self.all_categories_questions_idxs: np.array = np.zeros([self.q_a_matrix_cols, self.q_a_matrix_rows])
         self.user_all_q_a: dict = {}
+
         pass
 
     def get_one_cat_questions(self, cat_num):
@@ -31,7 +36,7 @@ class Quiz(object):
             list of unique categories"""
         categories = self.ld.get_column('cat_num').tolist()
         unq_categories, unq_counts = np.unique(categories, return_counts=True)
-        unq_categories = unq_categories[unq_counts >= 4]
+        unq_categories = unq_categories[unq_counts >= self.q_a_matrix_cols]
         unq_categories = list(unq_categories)
         # TODO: add check and get only ONE question from each unique score_group
         self.unq_categories = random.sample(unq_categories, k=self.categories_num)
@@ -52,12 +57,21 @@ class Quiz(object):
         self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
 
-    def create_5x4_question_box(self):
+    def create_rows_cols_pic_box(self):
+        pic_matrix: list = []
+        for row_idx in range(self.q_a_matrix_rows):
+            row_list: list = []
+            q_a = self.get_q_a(row_idx, 0)
+            row_list.append(q_a['category'].item())
+            row_list.append(str(q_a['score'].item()))
+            for cols_idx in range(1, self.q_a_matrix_cols):
+                q_a = self.get_q_a(row_idx, cols_idx)
+                row_list.append(str(q_a['score'].item()))
+            pic_matrix.append(row_list)
+        return pic_matrix, self.all_categories_questions_idxs
 
-        pass
-
-    def get_q_a(self, row, col) -> pd.DataFrame:
-        question_idx = self.all_categories_questions_idxs[row, col]
+    def get_q_a(self, row_idx, col_idx) -> pd.DataFrame:
+        question_idx = self.all_categories_questions_idxs[row_idx, col_idx]
         q_a = self.ld.db[self.ld.db.index == question_idx]
         return q_a
 
@@ -68,3 +82,4 @@ if __name__ == "__main__":
     q.prepare_questions()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
+    print(q.create_rows_cols_pic_box())
