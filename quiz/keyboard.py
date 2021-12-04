@@ -7,11 +7,18 @@ class Keyboard(object):
         self.kb_table = types.InlineKeyboardMarkup()
         pass
 
-    def fill_kb_table(self, table, table_type = 'table'):
+    def fill_kb_table(self, table, table_type='table'):
         for i, row in enumerate(table):
             button_list = list()
             for j, column in enumerate(row):
-                button_list.append(types.InlineKeyboardButton(f'{column}', callback_data=f'{table_type}{i}{j}'))
+                if not column == '-':
+                    button_list.append(types.InlineKeyboardButton(f'{column}',
+                                                                  callback_data=f'{table_type}{i}{j}')
+                                       )
+                else:
+                    button_list.append(types.InlineKeyboardButton(f'{column}',
+                                                                  callback_data=f'none{i}{j}')
+                                       )
             self.kb_table.row(*button_list)
             print(button_list[0])
         pass

@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 from user import User
 
-__version__ = 0.0004
+__version__ = 0.0006
 
 
 class QuizMain(object):
@@ -20,7 +20,6 @@ class QuizMain(object):
         pass
 
     def main(self):
-
         @self.bot.message_handler(commands=['start', 'rm'])
         def process_start_command(message):
             print(message.text)
@@ -76,6 +75,8 @@ class QuizMain(object):
                           f"Правильный ответ: {correct_answer_msg}"
                     self.bot.send_message(callback_data.message.chat.id, msg)
                     self.bot.send_message(callback_data.message.chat.id,'_', reply_markup=keyboard.get_instant())
+                if self.quiz.end_game_flag:
+                    self.end_of_the_game()
             pass
 
         def show_question_and_answers(callback_data):
@@ -85,10 +86,13 @@ class QuizMain(object):
             kb.fill_kb_table(answers_list, table_type='answer')
             self.bot.send_message(callback_data.message.chat.id, f"Вопрос:\n{question_msg}",
                                   reply_markup=kb.get_instant())
-            # self.bot.register_next_step_handler(question_msg, get_name)
             pass
 
         self.bot.polling(none_stop=True, interval=0)
+        pass
+
+    def end_of_the_game(self):
+
         pass
 
 
