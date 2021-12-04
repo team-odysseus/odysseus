@@ -1,27 +1,28 @@
 import pandas as pd
 import numpy as np
 
-__version__ = 0.0002
+__version__ = 0.0004
 
 class LoadData:
     def __init__(self, name):
         self.db = pd.read_csv(name,
                               delimiter=',',
-                              names=['index',
-                                     'cat_num',
-                                     'category',
-                                     'question',
-                                     'score',
-                                     'correct',
-                                     'not_correct_1',
-                                     'not_correct_2',
-                                     'not_correct_3',
-                                     'not_correct_4'
-                                     ]
+                              usecols=['index',
+                                       'cat_num',
+                                       'category',
+                                       'question',
+                                       'score',
+                                       'correct',
+                                       'not_correct_1',
+                                       'not_correct_2',
+                                       'not_correct_3',
+                                       'not_correct_4'
+                                       ],
+                              index_col='index'
                               )
 
     def get_lines_by_category(self, category):
-        lines_df = self.db[self.db.category == category]
+        lines_df = self.db[self.db['cat_num'] == category]
         return lines_df
 
     def get_column(self, column):
