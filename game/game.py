@@ -28,10 +28,10 @@ class Game:
 
         self.players.append(Player(player_id, self.start_iq, player_role))
 
-        if len(self.players) == MAX_PLAYERS:
-            self.start()
-
         return True
+
+    def is_ready(self):
+        return len(self.players) == MAX_PLAYERS
 
     def start(self):
         self.com.print_all("Game start")

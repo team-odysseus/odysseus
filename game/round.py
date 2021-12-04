@@ -4,7 +4,7 @@ import role
 class Round:
     def __init__(self):
         self.common_description = "Hello, round starts"
-        self.role_descriptions = {role.ROLE_GOOD: ("You are very good. Make your choice", ["Choice A", "Choice B"]),
+        self.role_descriptions = {role.ROLE_GOOD: ("You are very good.", ["Choice A", "Choice B"]),
                                   role.ROLE_BAD: ("You are so bad.", ["Kill all", "Kill one"])}
 
         pass

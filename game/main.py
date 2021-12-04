@@ -1,16 +1,17 @@
 import logging
-from logging import log
 
+from controller import Controller
 from game import Game
 
 
 def main():
-    print("Hello World!")
-
     g = Game()
     g.join(1)
     g.join(2)
     g.join(3)
+
+    c = Controller(g)
+    c.game_loop()
 
 
 if __name__ == "__main__":
