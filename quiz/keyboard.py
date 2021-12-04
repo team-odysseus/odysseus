@@ -16,6 +16,7 @@ class Keyboard(object):
                 button_list.append(types.InlineKeyboardButton(f'{cell}', callback_data=f'btn{i}{j}'))
                 j += 1
             self.kb_table.row(*button_list)
+            print(button_list[0])
             i += 1
         pass
 
