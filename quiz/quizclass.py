@@ -5,20 +5,33 @@ import numpy as np
 import pandas as pd
 from storage.database import LoadData
 
-__version_ = 0.0007
+__version_ = 0.0008
 
 
 class Quiz(object):
     def __init__(self, categories_num: int = 5):
         self.ld = LoadData()
+        self.questions_num = 4
         self.categories_num: int = categories_num
         self.unq_categories = np.arange(self.categories_num)
         self.all_categories_questions: list = []
         self.q_a_matrix_rows = categories_num
-        self.q_a_matrix_cols = 4
-        self.all_categories_questions_idxs: np.array = np.zeros([self.q_a_matrix_cols, self.q_a_matrix_rows])
+        self.q_a_matrix_cols = self.questions_num
+        self.all_categories_questions_idxs = np.zeros([self.q_a_matrix_cols, self.q_a_matrix_rows])
         self.user_all_q_a: dict = {}
-
+        self.current_answers_random_order = []
+        self.answers_num = 5
+        self.default_answers_order = range(self.answers_num)
+        self.current_answers_cols_order: list = []
+        self.answers_cos_dict = {0: 'correct',
+                                 1: 'not_correct_1',
+                                 2: 'not_correct_2',
+                                 3: 'not_correct_3',
+                                 4: 'not_correct_4',
+                                 }
+        self.all_categories_questions_used = np.empty([self.q_a_matrix_cols, self.q_a_matrix_rows], dtype=bool)
+        self.choose_categories()
+        self.prepare_questions()
         pass
 
     def get_one_cat_questions(self, cat_num):
@@ -59,7 +72,6 @@ class Quiz(object):
 
     def create_rows_cols_pic_box(self) -> Tuple[list, np.array]:
         """
-
         Returns:
             pic_matrix (list):      list of lists with str for buttons and picture creating
             array_idxs (np.array):  array with question indxs
@@ -71,9 +83,13 @@ class Quiz(object):
             row_list.append(q_a['category'].item())
             row_list.append(str(q_a['score'].item()))
             for cols_idx in range(1, self.q_a_matrix_cols):
-                q_a = self.get_q_a(row_idx, cols_idx)
-                row_list.append(str(q_a['score'].item()))
+                if self.all_categories_questions_used[row_idx, cols_idx]:
+                    q_a = self.get_q_a(row_idx, cols_idx)
+                    row_list.append(str(q_a['score'].item()))
+                else:
+                    row_list.append(str())
             pic_matrix.append(row_list)
+
         return pic_matrix, self.all_categories_questions_idxs
 
     def get_q_a(self, row_idx, col_idx) -> pd.DataFrame:
@@ -81,12 +97,39 @@ class Quiz(object):
         q_a = self.ld.db[self.ld.db.index == question_idx]
         return q_a
 
+    def get_question_and_answers(self, row_idx, col_idx):
+        self.current_answers_cols_order = list()
+        q_a = self.get_q_a(row_idx, col_idx)
+        self.current_answers_random_order = random.sample(self.default_answers_order, self.answers_num)
+        answers_list: list = []
+        for answer_num in self.current_answers_random_order:
+            col_name = self.answers_cos_dict[answer_num]
+            answer = q_a[col_name].item()
+            answers_list.append(answer)
+            self.current_answers_cols_order.append(col_name)
+            pass
+        question_and_answers = [q_a.question.item()]
+        question_and_answers.extend(answers_list)
+        return question_and_answers
+
+    def check_answer(self, row_idx, col_idx, answer_num) -> Tuple[bool, str, str]:
+        is_answer_correct = False
+        q_a = self.get_q_a(row_idx, col_idx)
+        if self.current_answers_random_order[answer_num] == 0:
+            is_answer_correct = True
+        user_answer_col = self.current_answers_cols_order[answer_num]
+        user_answer_msg = q_a[user_answer_col].item()
+        correct_answer_msg = q_a['correct'].item()
+        """ False => question used """
+        self.all_categories_questions_used[row_idx, col_idx] = False
+        return is_answer_correct, user_answer_msg, correct_answer_msg
+
 
 if __name__ == "__main__":
     q = Quiz()
-    q.choose_categories()
-    q.prepare_questions()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
     pic_list, _ = q.create_rows_cols_pic_box()
+    print(q.get_question_and_answers(2, 3))
+    print(q.check_answer(2, 3, 2))
     print(pic_list)
