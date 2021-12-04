@@ -6,8 +6,12 @@ from game import Game
 
 def main():
     g = Game()
-    g.join(1)
-    g.join(2)
+
+    # player1 id
+    g.join(7374768)
+    # player2 id
+    g.join(8347838)
+    # player3 id
     g.join(3)
 
     c = Controller(g)

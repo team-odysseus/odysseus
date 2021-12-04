@@ -13,8 +13,8 @@ class Controller:
         self.game.start()
 
         while not self.game.is_over():
-            self.game.player_move(1, answer={"influence": 20, "text": "Good move"})
-            self.game.player_move(2, answer={"influence": -30, "text": "Bad move"})
+            self.game.player_move(7374768, choice=0)
+            self.game.player_move(8347838, choice=1)
             logging.info(f"Round {self.game.moveCount} is over")
             self.game.advance_round()
 
