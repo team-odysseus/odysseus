@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Tuple
 from storage.database import LoadData
 
-__version_ = 0.0009
+__version_ = 0.0010
 
 
 class Quiz(object):
@@ -32,6 +32,8 @@ class Quiz(object):
         self.user_route: dict = {}
         self.questions_count = 0
         self.user_score = 0
+        self.question_row_idx = 0
+        self.question_col_idx = 0
         self.end_game_flag = False
         self.choose_categories()
         self.prepare_questions()
@@ -84,7 +86,10 @@ class Quiz(object):
             row_list: list = []
             q_a = self.get_q_a(row_idx, 0)
             row_list.append(q_a['category'].item())
-            row_list.append(str(q_a['score'].item()))
+            if not self.all_categories_questions_used[row_idx, 0]:
+                row_list.append(str(q_a['score'].item()))
+            else:
+                row_list.append('-')
             # TODO sort by score
             for cols_idx in range(1, self.q_a_matrix_cols):
                 if not self.all_categories_questions_used[row_idx, cols_idx]:
@@ -103,7 +108,9 @@ class Quiz(object):
     def get_question_and_answers(self, row_idx: int, col_idx: int):
         self.questions_count += 1
         self.current_answers_cols_order = list()
-        q_a = self.get_q_a(row_idx, col_idx)
+        self.question_row_idx = row_idx
+        self.question_col_idx = col_idx
+        q_a = self.get_q_a(self.question_row_idx, self.question_col_idx)
         self.current_answers_random_order = random.sample(self.default_answers_order, self.answers_num)
         answers_list: list = []
         for answer_num in self.current_answers_random_order:
@@ -112,12 +119,14 @@ class Quiz(object):
             answers_list.append([answer])
             self.current_answers_cols_order.append(col_name)
             pass
+        """ True => question used """
+        self.all_categories_questions_used[self.question_row_idx, self.question_col_idx] = True
         question = q_a.question.item()
         return question, answers_list
 
-    def check_answer(self, row_idx, col_idx, answer_num) -> Tuple[bool, str, str]:
+    def check_answer(self, answer_num) -> Tuple[bool, str, str]:
         is_answer_correct = False
-        q_a = self.get_q_a(row_idx, col_idx)
+        q_a = self.get_q_a(self.question_row_idx, self.question_col_idx)
         if self.current_answers_random_order[answer_num] == 0:
             is_answer_correct = True
         user_answer_col = self.current_answers_cols_order[answer_num]
@@ -131,11 +140,8 @@ class Quiz(object):
         answer_data.append(is_answer_correct)
         answer_data.append(user_true_answer_num)
         user_answer_data.update({int(q_a.index.item()): answer_data})
-
         self.user_route.update({self.questions_count: user_answer_data})
         # print(self.user_route)
-        """ True => question used """
-        self.all_categories_questions_used[row_idx, col_idx] = True
         if not np.count_nonzero(self.all_categories_questions_used):
             self.end_game_flag = True
         return is_answer_correct, user_answer_msg, correct_answer_msg

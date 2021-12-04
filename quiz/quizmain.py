@@ -4,7 +4,7 @@ import telebot
 from telebot import types
 from user import User
 
-__version__ = 0.0003
+__version__ = 0.0004
 
 
 class QuizMain(object):
@@ -40,11 +40,12 @@ class QuizMain(object):
 
         @self.bot.callback_query_handler(func=lambda callback_data: True)
         def callback_worker(callback_data):
-            # print(callback_data.data)
+            print(callback_data.data)
             keyboard = Keyboard()
             keyboard.fill_kb_table(self.button_data_str)
             if callback_data.data.startswith('table'):
                 code = callback_data.data[-2:]
+                print(code)
                 if code.isdigit():
                     code = int(code)
                     self.button_row_idx = code // 10
@@ -52,16 +53,17 @@ class QuizMain(object):
                     if self.button_col_idx == 0:
                         return
                     show_question_and_answers(callback_data)
+                self.button_data_str, _ = self.quiz.create_rows_cols_pic_box()
                 self.bot.answer_callback_query(callback_data.id)
                 pass
             elif callback_data.data.startswith('answer'):
                 code = callback_data.data[-2:]
+                print(code)
                 if code.isdigit():
                     code = int(code)
                     button_num = code // 10
-                is_answer_correct, user_answer_msg, correct_answer_msg = self.quiz.check_answer(self.button_row_idx,
-                                                                                                self.button_col_idx,
-                                                                                                button_num)
+                is_answer_correct, user_answer_msg, correct_answer_msg = self.quiz.check_answer(button_num)
+
                 if is_answer_correct:
                     msg = f"Это правильный ответ! :\n" \
                           f"Ваш ответ: {user_answer_msg}\n" \
@@ -74,11 +76,10 @@ class QuizMain(object):
                           f"Правильный ответ: {correct_answer_msg}"
                     self.bot.send_message(callback_data.message.chat.id, msg)
                     self.bot.send_message(callback_data.message.chat.id,'_', reply_markup=keyboard.get_instant())
-                self.button_data_str, _ = self.quiz.create_rows_cols_pic_box()
             pass
 
         def show_question_and_answers(callback_data):
-            question_msg, answers_list = self.quiz.get_question_and_answers(self.button_row_idx-1, self.button_col_idx-1)
+            question_msg, answers_list = self.quiz.get_question_and_answers(self.button_row_idx, self.button_col_idx-1)
             print(answers_list)
             kb = Keyboard()
             kb.fill_kb_table(answers_list, table_type='answer')
