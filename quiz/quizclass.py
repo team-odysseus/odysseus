@@ -1,4 +1,6 @@
 import random
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from storage.database import LoadData
@@ -57,7 +59,13 @@ class Quiz(object):
         self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
 
-    def create_rows_cols_pic_box(self):
+    def create_rows_cols_pic_box(self) -> Tuple[list, np.array]:
+        """
+
+        Returns:
+            pic_matrix (list):      list of lists with str for buttons and picture creating
+            array_idxs (np.array):  array with question indxs
+        """
         pic_matrix: list = []
         for row_idx in range(self.q_a_matrix_rows):
             row_list: list = []
@@ -82,4 +90,5 @@ if __name__ == "__main__":
     q.prepare_questions()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
-    print(q.create_rows_cols_pic_box())
+    pic_list, _ = q.create_rows_cols_pic_box()
+    print(pic_list)
