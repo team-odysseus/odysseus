@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 from storage.database import LoadData
 
-__version_ = 0.0004
+__version_ = 0.0005
 
 
 class Quiz(object):
@@ -12,6 +12,7 @@ class Quiz(object):
         self.categories_num: int = categories_num
         self.unq_categories = np.arange(self.categories_num)
         self.all_categories_questions: list = []
+        self.all_categories_questions_idxs: np.array = np.zeros([4, 5])
         self.user_all_q_a: dict = {}
         pass
 
@@ -31,22 +32,34 @@ class Quiz(object):
         categories = self.ld.get_column('cat_num').tolist()
         unq_categories, unq_counts = np.unique(categories, return_counts=True)
         unq_categories = unq_categories[unq_counts >= 4]
-        self.unq_categories = random.choices(unq_categories, k=self.categories_num)
+        unq_categories = list(unq_categories)
+        # TODO: add check and get only ONE question from each unique score_group
+        self.unq_categories = random.sample(unq_categories, k=self.categories_num)
         pass
 
     def prepare_questions(self):
+        all_categories_questions_idxs: list = []
         for cat_num in self.unq_categories:
             cat_questions = self.get_one_cat_questions(cat_num)
+            cat_questions_idxs = cat_questions.index.tolist()
             self.all_categories_questions.append(cat_questions)
             q_a_dict: dict = {}
             for idx in cat_questions.index:
                 """ creating dictionary for user answers """
                 q_a_dict.update({idx: -1})
             self.user_all_q_a.update({cat_num: q_a_dict})
+            all_categories_questions_idxs.append(cat_questions_idxs)
+        self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
 
     def create_5x4_question_box(self):
+
         pass
+
+    def get_q_a(self, row, col) -> pd.DataFrame:
+        question_idx = self.all_categories_questions_idxs[row, col]
+        q_a = self.ld.db[self.ld.db.index == question_idx]
+        return q_a
 
 
 if __name__ == "__main__":
@@ -54,3 +67,4 @@ if __name__ == "__main__":
     q.choose_categories()
     q.prepare_questions()
     print(q.all_categories_questions)
+    print(q.get_q_a(2, 3))
