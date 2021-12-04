@@ -1,26 +1,40 @@
 import random
-from typing import Tuple
-
 import numpy as np
 import pandas as pd
+from typing import Tuple
 from storage.database import LoadData
 
-__version_ = 0.0006
+__version_ = 0.0008
 
 
 class Quiz(object):
-    def __init__(self,
-                 name_quiz_data_file,
-                 categories_num: int = 5):
-        self.ld = LoadData(name_quiz_data_file)
+    def __init__(self, categories_num: int = 5):
+        self.ld = LoadData()
+        self.questions_num = 4
         self.categories_num: int = categories_num
         self.unq_categories = np.arange(self.categories_num)
         self.all_categories_questions: list = []
         self.q_a_matrix_rows = categories_num
-        self.q_a_matrix_cols = 4
-        self.all_categories_questions_idxs: np.array = np.zeros([self.q_a_matrix_cols, self.q_a_matrix_rows])
+        self.q_a_matrix_cols = self.questions_num
+        self.all_categories_questions_idxs = np.zeros([self.q_a_matrix_rows, self.q_a_matrix_cols])
         self.user_all_q_a: dict = {}
-
+        self.current_answers_random_order = []
+        self.answers_num = 5
+        self.default_answers_order = range(self.answers_num)
+        self.current_answers_cols_order: list = []
+        self.answers_cos_dict = {0: 'correct',
+                                 1: 'not_correct_1',
+                                 2: 'not_correct_2',
+                                 3: 'not_correct_3',
+                                 4: 'not_correct_4',
+                                 }
+        self.all_categories_questions_used = np.empty([self.q_a_matrix_rows, self.q_a_matrix_cols], dtype=bool)
+        self.user_route: dict = {}
+        self.questions_count = 0
+        self.user_score = 0
+        self.end_game_flag = False
+        self.choose_categories()
+        self.prepare_questions()
         pass
 
     def get_one_cat_questions(self, cat_num):
@@ -50,18 +64,17 @@ class Quiz(object):
             cat_questions = self.get_one_cat_questions(cat_num)
             cat_questions_idxs = cat_questions.index.tolist()
             self.all_categories_questions.append(cat_questions)
-            q_a_dict: dict = {}
-            for idx in cat_questions.index:
-                """ creating dictionary for user answers """
-                q_a_dict.update({idx: -1})
-            self.user_all_q_a.update({cat_num: q_a_dict})
+            # q_a_dict: dict = {}
+            # for idx in cat_questions.index:
+            #     """ creating dictionary for user answers """
+            #     q_a_dict.update({idx: -1})
+            # self.user_all_q_a.update({cat_num: q_a_dict})
             all_categories_questions_idxs.append(cat_questions_idxs)
         self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
 
     def create_rows_cols_pic_box(self) -> Tuple[list, np.array]:
         """
-
         Returns:
             pic_matrix (list):      list of lists with str for buttons and picture creating
             array_idxs (np.array):  array with question indxs
@@ -72,10 +85,15 @@ class Quiz(object):
             q_a = self.get_q_a(row_idx, 0)
             row_list.append(q_a['category'].item())
             row_list.append(str(q_a['score'].item()))
+            # TODO sort by score
             for cols_idx in range(1, self.q_a_matrix_cols):
-                q_a = self.get_q_a(row_idx, cols_idx)
-                row_list.append(str(q_a['score'].item()))
+                if not self.all_categories_questions_used[row_idx, cols_idx]:
+                    q_a = self.get_q_a(row_idx, cols_idx)
+                    row_list.append(str(q_a['score'].item()))
+                else:
+                    row_list.append(str())
             pic_matrix.append(row_list)
+
         return pic_matrix, self.all_categories_questions_idxs
 
     def get_q_a(self, row_idx, col_idx) -> pd.DataFrame:
@@ -83,12 +101,57 @@ class Quiz(object):
         q_a = self.ld.db[self.ld.db.index == question_idx]
         return q_a
 
+    def get_question_and_answers(self, row_idx, col_idx):
+        self.questions_count += 1
+        self.current_answers_cols_order = list()
+        q_a = self.get_q_a(row_idx, col_idx)
+        self.current_answers_random_order = random.sample(self.default_answers_order, self.answers_num)
+        answers_list: list = []
+        for answer_num in self.current_answers_random_order:
+            col_name = self.answers_cos_dict[answer_num]
+            answer = q_a[col_name].item()
+            answers_list.append(answer)
+            self.current_answers_cols_order.append(col_name)
+            pass
+        question_and_answers = [q_a.question.item()]
+        question_and_answers.extend(answers_list)
+        return question_and_answers
+
+    def check_answer(self, row_idx, col_idx, answer_num) -> Tuple[bool, str, str]:
+        is_answer_correct = False
+        q_a = self.get_q_a(row_idx, col_idx)
+        if self.current_answers_random_order[answer_num] == 0:
+            is_answer_correct = True
+        user_answer_col = self.current_answers_cols_order[answer_num]
+        user_answer_msg = q_a[user_answer_col].item()
+        correct_answer_msg = q_a['correct'].item()
+        if is_answer_correct:
+            self.user_score += int(q_a.score.item())
+        user_true_answer_num = self.current_answers_random_order[answer_num]
+        user_answer_data: dict = {}
+        answer_data = list()
+        answer_data.append(is_answer_correct)
+        answer_data.append(user_true_answer_num)
+        user_answer_data.update({int(q_a.index.item()): answer_data})
+
+        self.user_route.update({self.questions_count: user_answer_data})
+        print(self.user_route)
+        """ True => question used """
+        self.all_categories_questions_used[row_idx, col_idx] = True
+        if not np.count_nonzero(self.all_categories_questions_used):
+            self.end_game_flag = True
+        return is_answer_correct, user_answer_msg, correct_answer_msg
+
+    def get_user_stats(self):
+        return self.user_route, self.user_score
 
 if __name__ == "__main__":
-    q = Quiz(name_quiz_data_file='../storage/quiz.csv')
-    q.choose_categories()
-    q.prepare_questions()
+    q = Quiz()
+    # q.choose_categories()
+    # q.prepare_questions()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
     pic_list, _ = q.create_rows_cols_pic_box()
+    print(q.get_question_and_answers(2, 3))
+    print(q.check_answer(2, 3, 2))
     print(pic_list)
