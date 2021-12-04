@@ -1,0 +1,1 @@
+ROLE_GOOD, ROLE_BAD = range(2)

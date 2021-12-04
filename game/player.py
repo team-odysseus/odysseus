@@ -7,5 +7,5 @@ class Player:
         self.id = _id
         self.iq = _iq
         self.role = _role
-        logging.debug("Player created " + str(self.iq) + " " + self.role)
+        logging.debug("Player created " + str(self.iq) + " " + str(self.role))
 
