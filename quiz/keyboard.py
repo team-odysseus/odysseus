@@ -7,13 +7,13 @@ class Keyboard(object):
         self.kb_table = types.InlineKeyboardMarkup()
         pass
 
-    def fill_kb_table(self, table):
+    def fill_kb_table(self, table, table_type = 'table'):
         i = 0
         for row in table:
             button_list = list()
             j = 0
             for cell in row:
-                button_list.append(types.InlineKeyboardButton(f'{cell}', callback_data=f'btn{i}{j}'))
+                button_list.append(types.InlineKeyboardButton(f'{cell}', callback_data=f'{table_type}{i}{j}'))
                 j += 1
             self.kb_table.row(*button_list)
             print(button_list[0])

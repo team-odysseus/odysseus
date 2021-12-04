@@ -1,8 +1,8 @@
 from keyboard import Keyboard
 from quizclass import Quiz
-# from game.player import Player
 import telebot
 from telebot import types
+from user import User
 
 __version__ = 0.0001
 
@@ -40,21 +40,40 @@ class QuizMain(object):
         @self.bot.callback_query_handler(func=lambda callback_data: True)
         def callback_worker(callback_data):
             print(callback_data.data)
-            code = callback_data.data[-2]
-            if code.isdigit():
-                code = int(code)
-                self.button_row_idx = code // 10
-                self.button_col_idx = code % 10
-                show_question_and_answers(callback_data)
-            self.bot.answer_callback_query(callback_data.id)
-            pass
+            if callback_data.data.startswith('table'):
+                code = callback_data.data[-2]
+                if code.isdigit():
+                    code = int(code)
+                    self.button_row_idx = code // 10
+                    self.button_col_idx = code % 10
+                    show_question_and_answers(callback_data)
+                self.bot.answer_callback_query(callback_data.id)
+                pass
+            if callback_data.data.startswith('answer'):
+                is_answer_correct, user_answer_msg, correct_answer_msg = self.quiz.check_answer(self.button_row_idx,
+                                                                                                self.button_col_idx,
+                                                                                                self.button_row_idx)
+                if is_answer_correct:
+                    msg = f"Это правильный ответ! :\n" \
+                        "Ваш ответ: {user_answer_msg}\n" \
+                        "Правильный ответ: {correct_answer_msg}"
+                    self.bot.send_message(callback_data.message.chat.id,
+                                          msg,
+                                          reply_markup=self.keyboard.get_instant())
+                else:
+                    pass
         # bot.register_next_step_handler(message, get_name)
 
         def show_question_and_answers(callback_data):
             question_msg, answers_list = self.quiz.get_question_and_answers(self.button_row_idx, self.button_col_idx)
-            self.bot.send_message(callback_data.message.chat.id, question_msg)
+            print(answers_list)
+            kb = Keyboard()
+            kb.fill_kb_table(answers_list, table_type='answer')
+            self.bot.send_message(callback_data.message.chat.id, f"Вопрос:\n{question_msg}", reply_markup=kb.get_instant())
             # self.bot.register_next_step_handler(question_msg, get_name)
             pass
+
+
 
         self.bot.polling(none_stop=True, interval=0)
         pass

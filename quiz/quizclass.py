@@ -110,7 +110,7 @@ class Quiz(object):
         for answer_num in self.current_answers_random_order:
             col_name = self.answers_cos_dict[answer_num]
             answer = q_a[col_name].item()
-            answers_list.append(answer)
+            answers_list.append([answer])
             self.current_answers_cols_order.append(col_name)
             pass
         question = q_a.question.item()
