@@ -18,6 +18,7 @@ class Game:
         self.rounds = [Round(), Round()]
         self.current_round = None
         self.com = communications.ComConsole()
+        self.history = dict()
         logging.info("Game created")
 
     def join(self, player_id):
@@ -40,10 +41,22 @@ class Game:
         pass
 
     def announce_round(self):
+        self.history[self.moveCount] = []
         self.com.print_all("Round starts: " + self.current_round.common_description)
         for p in self.players:
             role_instruction = self.current_round.get_role_text(p.role)
             self.com.print_player(p.id, role_instruction)
 
+    def round_results(self):
+        self.com.print_all("Round results: ")
+        for p in self.history[self.moveCount]:
+            self.com.print_all(str(p[0]) + ': ' + p[1]["text"])
+        self.com.print_all("Safety is " + str(self.safety))
+
     def player_move(self, player_id, answer):
-        pass
+        self.history[self.moveCount].append([player_id, answer])
+        self.safety += answer["influence"]
+        if len(self.history[self.moveCount]) == len(self.players):
+            self.round_results()
+
+
