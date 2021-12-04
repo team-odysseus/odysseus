@@ -4,7 +4,7 @@ import pandas as pd
 from typing import Tuple
 from storage.database import LoadData
 
-__version_ = 0.0008
+__version_ = 0.0009
 
 
 class Quiz(object):
@@ -91,9 +91,8 @@ class Quiz(object):
                     q_a = self.get_q_a(row_idx, cols_idx)
                     row_list.append(str(q_a['score'].item()))
                 else:
-                    row_list.append(str())
+                    row_list.append('-')
             pic_matrix.append(row_list)
-
         return pic_matrix, self.all_categories_questions_idxs
 
     def get_q_a(self, row_idx, col_idx) -> pd.DataFrame:
@@ -134,7 +133,7 @@ class Quiz(object):
         user_answer_data.update({int(q_a.index.item()): answer_data})
 
         self.user_route.update({self.questions_count: user_answer_data})
-        print(self.user_route)
+        # print(self.user_route)
         """ True => question used """
         self.all_categories_questions_used[row_idx, col_idx] = True
         if not np.count_nonzero(self.all_categories_questions_used):
@@ -143,6 +142,7 @@ class Quiz(object):
 
     def get_user_stats(self):
         return self.user_route, self.user_score
+
 
 if __name__ == "__main__":
     q = Quiz()
