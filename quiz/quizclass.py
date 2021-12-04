@@ -1,8 +1,7 @@
 import random
-from typing import Tuple
-
 import numpy as np
 import pandas as pd
+from typing import Tuple
 from storage.database import LoadData
 
 __version_ = 0.0008
@@ -17,7 +16,7 @@ class Quiz(object):
         self.all_categories_questions: list = []
         self.q_a_matrix_rows = categories_num
         self.q_a_matrix_cols = self.questions_num
-        self.all_categories_questions_idxs = np.zeros([self.q_a_matrix_cols, self.q_a_matrix_rows])
+        self.all_categories_questions_idxs = np.zeros([self.q_a_matrix_rows, self.q_a_matrix_cols])
         self.user_all_q_a: dict = {}
         self.current_answers_random_order = []
         self.answers_num = 5
@@ -29,7 +28,11 @@ class Quiz(object):
                                  3: 'not_correct_3',
                                  4: 'not_correct_4',
                                  }
-        self.all_categories_questions_used = np.empty([self.q_a_matrix_cols, self.q_a_matrix_rows], dtype=bool)
+        self.all_categories_questions_used = np.empty([self.q_a_matrix_rows, self.q_a_matrix_cols], dtype=bool)
+        self.user_route: dict = {}
+        self.questions_count = 0
+        self.user_score = 0
+        self.end_game_flag = False
         self.choose_categories()
         self.prepare_questions()
         pass
@@ -61,11 +64,11 @@ class Quiz(object):
             cat_questions = self.get_one_cat_questions(cat_num)
             cat_questions_idxs = cat_questions.index.tolist()
             self.all_categories_questions.append(cat_questions)
-            q_a_dict: dict = {}
-            for idx in cat_questions.index:
-                """ creating dictionary for user answers """
-                q_a_dict.update({idx: -1})
-            self.user_all_q_a.update({cat_num: q_a_dict})
+            # q_a_dict: dict = {}
+            # for idx in cat_questions.index:
+            #     """ creating dictionary for user answers """
+            #     q_a_dict.update({idx: -1})
+            # self.user_all_q_a.update({cat_num: q_a_dict})
             all_categories_questions_idxs.append(cat_questions_idxs)
         self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
@@ -82,8 +85,9 @@ class Quiz(object):
             q_a = self.get_q_a(row_idx, 0)
             row_list.append(q_a['category'].item())
             row_list.append(str(q_a['score'].item()))
+            # TODO sort by score
             for cols_idx in range(1, self.q_a_matrix_cols):
-                if self.all_categories_questions_used[row_idx, cols_idx]:
+                if not self.all_categories_questions_used[row_idx, cols_idx]:
                     q_a = self.get_q_a(row_idx, cols_idx)
                     row_list.append(str(q_a['score'].item()))
                 else:
@@ -98,6 +102,7 @@ class Quiz(object):
         return q_a
 
     def get_question_and_answers(self, row_idx, col_idx):
+        self.questions_count += 1
         self.current_answers_cols_order = list()
         q_a = self.get_q_a(row_idx, col_idx)
         self.current_answers_random_order = random.sample(self.default_answers_order, self.answers_num)
@@ -120,13 +125,30 @@ class Quiz(object):
         user_answer_col = self.current_answers_cols_order[answer_num]
         user_answer_msg = q_a[user_answer_col].item()
         correct_answer_msg = q_a['correct'].item()
-        """ False => question used """
-        self.all_categories_questions_used[row_idx, col_idx] = False
+        if is_answer_correct:
+            self.user_score += int(q_a.score.item())
+        user_true_answer_num = self.current_answers_random_order[answer_num]
+        user_answer_data: dict = {}
+        answer_data = list()
+        answer_data.append(is_answer_correct)
+        answer_data.append(user_true_answer_num)
+        user_answer_data.update({int(q_a.index.item()): answer_data})
+
+        self.user_route.update({self.questions_count: user_answer_data})
+        print(self.user_route)
+        """ True => question used """
+        self.all_categories_questions_used[row_idx, col_idx] = True
+        if not np.count_nonzero(self.all_categories_questions_used):
+            self.end_game_flag = True
         return is_answer_correct, user_answer_msg, correct_answer_msg
 
+    def get_user_stats(self):
+        return self.user_route, self.user_score
 
 if __name__ == "__main__":
     q = Quiz()
+    # q.choose_categories()
+    # q.prepare_questions()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
     pic_list, _ = q.create_rows_cols_pic_box()
