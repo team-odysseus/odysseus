@@ -67,4 +67,4 @@ if __name__ == "__main__":
     q.choose_categories()
     q.prepare_questions()
     print(q.all_categories_questions)
-    print(q.get_q_a(2, 3))
+    print(q.get_q_a(4, 3))
