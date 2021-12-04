@@ -81,7 +81,7 @@ class Game:
         return not (self.moveCount + 1 < len(self.rounds))
 
     def finish(self):
-        self.com.print_all(f"Game is over. Result {self.safety}")
+        self.com.print_all(f"Game is over. Result {self.stats}")
 
 
 
