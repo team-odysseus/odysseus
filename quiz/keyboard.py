@@ -50,30 +50,16 @@ def main():
     async def process_rm_command(message: types.Message):
         await message.reply("Убираем шаблоны сообщений", reply_markup=ReplyKeyboardRemove())
 
-    @dp.callback_query_handler(func=lambda c: c.data and c.data.startswith('btn'))
-    async def process_callback_kb1btn1(callback_query: types.CallbackQuery):
-        code = callback_query.data[-1]
-        if code.isdigit():
-            code = int(code)
-        if code == 2:
-            await bot.answer_callback_query(callback_query.id, text='Нажата вторая кнопка')
-        elif code == 5:
-            await bot.answer_callback_query(
-                callback_query.id,
-                text='Нажата кнопка с номером 5.\nА этот текст может быть длиной до 200 символов 😉', show_alert=True)
-        else:
-            await bot.answer_callback_query(callback_query.id)
-        await bot.send_message(callback_query.from_user.id, f'Нажата инлайн кнопка! code={code}')
 
-    @dp.callback_query_handler(func=lambda c: c.data and c.data.startswith('btn'))
-    async def process_callback_kb1btn1(callback_query: types.CallbackQuery):
-        code = callback_query.data[-2]
-        if code.isdigit():
-            code = int(code)
-            row = code // 10
-            col = code % 10
 
-        await bot.answer_callback_query(callback_query.id)
+#    @dp.callback_query_handler(func=lambda c: c.data and c.data.startswith('btn'))
+#    async def process_callback_kb1btn1(callback_query: types.CallbackQuery):
+#        code = callback_query.data[-2]
+#        if code.isdigit():
+#           code = int(code)
+#            row = code // 10
+#            col = code % 10
+#        await bot.answer_callback_query(callback_query.id)
 
 
     executor.start_polling(dp)
