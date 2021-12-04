@@ -101,7 +101,7 @@ class Quiz(object):
         q_a = self.ld.db[self.ld.db.index == question_idx]
         return q_a
 
-    def get_question_and_answers(self, row_idx, col_idx):
+    def get_question_and_answers(self, row_idx: int, col_idx: int):
         self.questions_count += 1
         self.current_answers_cols_order = list()
         q_a = self.get_q_a(row_idx, col_idx)
@@ -113,9 +113,8 @@ class Quiz(object):
             answers_list.append(answer)
             self.current_answers_cols_order.append(col_name)
             pass
-        question_and_answers = [q_a.question.item()]
-        question_and_answers.extend(answers_list)
-        return question_and_answers
+        question = q_a.question.item()
+        return question, answers_list
 
     def check_answer(self, row_idx, col_idx, answer_num) -> Tuple[bool, str, str]:
         is_answer_correct = False
