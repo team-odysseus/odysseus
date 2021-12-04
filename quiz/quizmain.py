@@ -11,7 +11,7 @@ class QuizMain(object):
     def __init__(self):
         self.quiz = Quiz()
         # self.keyboard = Keyboard()
-        self.bot = telebot.TeleBot('1292821995:AAH-tyF6p0opLx9vtX4W69iC2z30sln9O3U');
+        self.bot = telebot.TeleBot('1292821995:AAH-tyF6p0opLx9vtX4W69iC2z30sln9O3U')
         self.message_to_send = str()
         self.button_row_idx = 0
         self.button_col_idx = 0
@@ -26,7 +26,8 @@ class QuizMain(object):
 
             hello_msg = "Привет, я Одиссей, чат-бот созданный для обучения кибербезопасности. " \
                         "Мой тёзка придумал Троянского коня, а я помогу Вам защитится от троянов!\n" \
-                        "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n"
+                        "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n\n" \
+                        "Для того чтобы мы могли вы могли начать сообщите свой контакт:"
 
             if message.text == '/start':
                 keyboard = Keyboard()
@@ -76,8 +77,12 @@ class QuizMain(object):
                     self.bot.send_message(callback_data.message.chat.id, msg)
                     self.bot.send_message(callback_data.message.chat.id,'_', reply_markup=keyboard.get_instant())
                 if self.quiz.end_game_flag:
-                    self.end_of_the_game()
+                    self.end_of_the_game(callback_data)
+            elif callback_data.data == 'exit':
+                self.quiz.end_game_flag = True
+                self.end_of_the_game(callback_data)
             pass
+
 
         def show_question_and_answers(callback_data):
             question_msg, answers_list = self.quiz.get_question_and_answers(self.button_row_idx, self.button_col_idx-1)
@@ -91,8 +96,18 @@ class QuizMain(object):
         self.bot.polling(none_stop=True, interval=0)
         pass
 
-    def end_of_the_game(self):
+    def end_of_the_game(self, callback_data):
+        msg = "Поздравляем!\n"
+        count_questions_in_game = self.quiz.q_a_matrix_rows * self.quiz.q_a_matrix_cols
+        if self.quiz.questions_count == count_questions_in_game:
+            msg += "Вы ответили на все вопросы в игре!\n"
+        else:
+            msg += f"Вы ответили на {self.quiz.questions_count} из {count_questions_in_game} вопросов!\n"\
+                    "Чтобы набрать больше баллов отвечайте на все вопросы."
 
+        msg += f"Ваш результат в игре: {self.quiz.user_score} очков"
+
+        self.bot.send_message(callback_data.message.chat.id, msg)
         pass
 
 
