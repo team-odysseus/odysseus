@@ -43,25 +43,26 @@ class Game:
 
     def announce_round(self):
         self.history[self.moveCount] = []
-        self.com.print_all("Round starts: " + self.current_round.common_description)
+        self.com.print_all("Round starts: " + self.current_round.get_round_description())
         for p in self.players:
-            role_instruction = self.current_round.get_role_text(p.role)
+            role_instruction = self.current_round.print_role_options(p.role)
             self.com.print_player(p.id, role_instruction)
 
     def round_results(self):
         self.com.print_all("Round results: ")
-        for p in self.history[self.moveCount]:
-            self.com.print_all(str(p[0]) + ': ' + p[1]["text"])
-        self.com.print_all("Safety is " + str(self.safety))
+#        for p in self.history[self.moveCount]:
+#            self.com.print_all(str(p[0]) + ': ' + p[1]["text"])
+        for stat, s_value in self.stats.items():
+            self.com.print_all(stat + " is " + str(s_value))
 
     def player_move(self, player_id, choice: int):
         self.history[self.moveCount].append([player_id, choice])
-        self.update_stats(choice)
+        for p in self.players:
+            if p.id == player_id:
+                self.update_stats(p.role, p.iq, choice)
         if len(self.history[self.moveCount]) == len(self.players):
             self.round_results()
 
-    def update_stats(self, choice: int):
-        increment = 0
-        player_iq = 0
-        self.stats[""] += increment * player_iq
-
+    def update_stats(self, p_role, p_iq, choice: int):
+        for stat, increment in self.current_round.get_choice_stat(p_role, choice).items():
+            self.stats[stat] += increment * p_iq / 100
