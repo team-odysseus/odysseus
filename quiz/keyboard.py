@@ -13,14 +13,12 @@ class Keyboard(object):
             for j, column in enumerate(row):
                 if not column == '-':
                     button_list.append(types.InlineKeyboardButton(f'{column}',
-                                                                  callback_data=f'{table_type}{i}{j}')
-                                       )
+                                                                  callback_data=f'{table_type}{i}{j}'))
                 else:
                     button_list.append(types.InlineKeyboardButton(f'{column}',
-                                                                  callback_data=f'none{i}{j}')
-                                       )
+                                                                  callback_data=f'none{i}{j}'))
             self.kb_table.row(*button_list)
-            print(button_list[0])
+#        self.kb_table.add(types.InlineKeyboardButton('Закончить игру', callback_data='exit'))
         pass
 
     def get_instant(self):
