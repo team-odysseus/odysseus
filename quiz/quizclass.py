@@ -12,8 +12,10 @@ class Quiz(object):
         self.unq_categories = np.arange(self.categories_num)
         pass
 
-    def get_one_cat_questions(self):
-        pass
+    def get_one_cat_questions(self, cat_num):
+        questions = self.ld.get_lines_by_category(cat_num)
+        questions = random.choices(questions, k=4)
+        return questions
 
     def choose_categories(self):
         """ take list of question categories from DB.
@@ -30,6 +32,7 @@ class Quiz(object):
         return unq_categories
 
     def prepare_questions(self):
+
         return
 
     def create_5x4_question_box(self):
