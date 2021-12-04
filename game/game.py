@@ -40,7 +40,7 @@ class Game:
         pass
 
     def announce_round(self):
-        print("Round starts: " + self.current_round.common_description)
+        self.com.print_all("Round starts: " + self.current_round.common_description)
         for p in self.players:
             role_instruction = self.current_round.get_role_text(p.role)
             self.com.print_player(p.id, role_instruction)
