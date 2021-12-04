@@ -11,7 +11,6 @@ MAX_PLAYERS = 2
 class Game:
     def __init__(self):
         self.moveCount = 0
-        self.safety = 100
         self.players = list()
         self.start_iq = 100
         self.available_roles = [role.ROLE_GOOD, role.ROLE_BAD]
@@ -19,6 +18,8 @@ class Game:
         self.current_round = None
         self.com = communications.ComConsole()
         self.history = dict()
+        self.stats = {"safety": 100,
+                      "money": 10000}
         logging.info("Game created")
 
     def join(self, player_id):
@@ -53,10 +54,14 @@ class Game:
             self.com.print_all(str(p[0]) + ': ' + p[1]["text"])
         self.com.print_all("Safety is " + str(self.safety))
 
-    def player_move(self, player_id, answer):
-        self.history[self.moveCount].append([player_id, answer])
-        self.safety += answer["influence"]
+    def player_move(self, player_id, choice: int):
+        self.history[self.moveCount].append([player_id, choice])
+        self.update_stats(choice)
         if len(self.history[self.moveCount]) == len(self.players):
             self.round_results()
 
+    def update_stats(self, choice: int):
+        increment = 0
+        player_iq = 0
+        self.stats[""] += increment * player_iq
 
