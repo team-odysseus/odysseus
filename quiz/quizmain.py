@@ -12,7 +12,7 @@ class QuizMain(object):
         self.quiz = Quiz()
         self.keyboard = Keyboard()
         self.bot = telebot.TeleBot('1292821995:AAH-tyF6p0opLx9vtX4W69iC2z30sln9O3U');
-        data_str, _  = self.quiz.create_rows_cols_pic_box()
+        data_str, _ = self.quiz.create_rows_cols_pic_box()
         self.keyboard.fill_kb_table(data_str)
         # self.keyboard.fill_kb_table([['Тема 1', 100, 200, 300, 400],
         #                             ['Тема 2', 100, 200, 300, 400],
@@ -36,8 +36,10 @@ class QuizMain(object):
         @self.bot.message_handler(commands=['start', 'rm'])
         def process_start_command(message):
             print(message.text)
+            hello_msg = "Приветсвуем вас в игре QUIZ, посвященной кибербезопасности!\n" \
+                        "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области"
             if message.text == '/start':
-                self.bot.send_message(message.from_user.id, "start", reply_markup=self.keyboard.get_instant())
+                self.bot.send_message(message.from_user.id, hello_msg, reply_markup=self.keyboard.get_instant())
             if message.text == '/rm':
                 self.bot.send_message(message.from_user.id, "rm", reply_markup=types.ReplyKeyboardRemove())
             pass
