@@ -33,7 +33,7 @@ class Round:
 
     def print_role_options(self, r_role: str):
         choices = self.get_role_choices(r_role)
-        i = 1
+        i = 0
         choices_text = []
         for choice in choices:
             choices_text.append(str(i) + " : " + choice[TEXT_KEY])

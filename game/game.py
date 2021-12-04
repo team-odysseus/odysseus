@@ -1,7 +1,6 @@
 import logging
 
 import game.role as role
-import game.communications as communications
 from game.player import Player
 from game.round import Round
 
@@ -16,7 +15,7 @@ class Game:
         self.available_roles = [role.ROLE_GOOD, role.ROLE_BAD]
         self.rounds = [Round(), Round()]
         self.current_round = None
-        self.com = communications.ComConsole()
+        self.com = None
         self.history = dict()
         self.stats = {"safety": 100,
                       "money": 10000}
@@ -33,6 +32,7 @@ class Game:
         return len(self.players) == MAX_PLAYERS
 
     def start(self):
+        self.com.set_players(list([p.id for p in self.players]))
         self.com.print_all("Game start")
         self.current_round = self.rounds[0]
         self.announce_round()
@@ -53,6 +53,7 @@ class Game:
             self.com.print_all(stat + " is " + str(s_value))
 
     def player_move(self, player_id, choice: int):
+        # TODO: check choice is valid
         self.history[self.round_index].append([player_id, choice])
         for p in self.players:
             if p.id == player_id:

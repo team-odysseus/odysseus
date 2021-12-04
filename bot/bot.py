@@ -49,30 +49,22 @@ def set_bot_controller(_controller):
 def start(update: Update, context: CallbackContext) -> int:
     if update is None or update.message is None or update.message.from_user is None:
         return
-    chats[update.message.from_user.id] = update.message.chat_id
-    update.message.reply_text('Game started')
+    player_id = update.message.from_user.id
+    chats[player_id] = update.message.chat_id
+
+    if controller.player_start(player_id):
+        update.message.reply_text('Joined')
+    else:
+        update.message.reply_text('Cannot join')
 
 
-def cancel(update: Update, context: CallbackContext) -> int:
-    """Cancels and ends the conversation."""
-    user = update.message.from_user
-    logger.info("User %s canceled the conversation.", user.first_name)
-    update.message.reply_text(
-        'Bye! I hope we can talk again some day.', reply_markup=ReplyKeyboardRemove()
-    )
-
-
-def on_text(update: Update, context: CallbackContext) -> int:
+def on_message(update: Update, context: CallbackContext) -> int:
     if update is None or update.message is None:
         return
     user = update.message.from_user
     text = update.message.text
     logger.info("Message from %s: %s", user.id, text)
-    update.message.reply_text('Thank you!')
-    for chat_id in chats.values():
-        if chat_id != chats[user.id]:
-            send_message(chat_id, text, ["Yes", "No"])
-            logger.info("Sent message to " + str(chat_id))
+    controller.player_message(user.id, text)
 
 
 # Buttons is list of strings. Each string represents one button.
@@ -96,7 +88,7 @@ def bot_main() -> None:
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(MessageHandler(Filters.regex(r'^/start$'), start))
-    dispatcher.add_handler(MessageHandler(Filters.text, on_text))
+    dispatcher.add_handler(MessageHandler(Filters.text, on_message))
 
     # Start the Bot
     updater.start_polling()

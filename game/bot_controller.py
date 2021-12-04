@@ -3,8 +3,9 @@ from game.game import Game
 
 
 class BotController:
-    def __init__(self):
+    def __init__(self, _com):
         self.game = Game()
+        self.game.com = _com
         pass
 
     def player_start(self, player_id):
