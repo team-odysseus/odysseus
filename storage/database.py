@@ -3,6 +3,7 @@ import pandas as pd
 
 __version__ = 0.0005
 
+
 class LoadData:
     def __init__(self):
         self.db_name = os.path.join('../storage', 'quiz.csv')
