@@ -1,9 +1,9 @@
 import random
 import numpy as np
 import pandas as pd
-
 from storage.database import LoadData
 
+__version_ = 0.0002
 
 class Quiz(object):
     def __init__(self, name_quiz_data_file, categories_num: int = 5):
@@ -14,10 +14,10 @@ class Quiz(object):
 
     def get_one_cat_questions(self, cat_num):
         questions = self.ld.get_lines_by_category(cat_num)
-        questions = random.choices(questions, k=4)
-        return questions
+        questions_out = questions.sample(n=4, random_state=42)
+        return questions_out
 
-    def choose_categories(self):
+    def choose_categories(self) -> None:
         """ take list of question categories from DB.
         Leave just unique and calculate count questions each category.
         If count of questions in category is 4 or more keep for use
@@ -29,9 +29,11 @@ class Quiz(object):
         unq_categories, unq_counts = np.unique(categories, return_counts=True)
         unq_categories = unq_categories[unq_counts >= 4]
         self.unq_categories = random.choices(unq_categories, k=self.categories_num)
-        return unq_categories
+        pass
 
     def prepare_questions(self):
+        for cat_num in self.unq_categories:
+            cat_questions = self.get_one_cat_questions(cat_num)
 
         return
 

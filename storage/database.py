@@ -1,11 +1,14 @@
 import pandas as pd
 import numpy as np
 
+__version__ = 0.0002
 
 class LoadData:
     def __init__(self, name):
-        self.db = pd.read_csv(name, delimiter=',',
-                              names=['cat_num',
+        self.db = pd.read_csv(name,
+                              delimiter=',',
+                              names=['index',
+                                     'cat_num',
                                      'category',
                                      'question',
                                      'score',
@@ -18,8 +21,8 @@ class LoadData:
                               )
 
     def get_lines_by_category(self, category):
-        a = self.db[self.db.Category == category]
-        print(a)
+        lines_df = self.db[self.db.category == category]
+        return lines_df
 
     def get_column(self, column):
         return self.db[column]
@@ -28,7 +31,7 @@ class LoadData:
         return self.db.iat[i, j]
 
     def base_size(self):
-        return self.db.Category.count()-1
+        return self.db.category.count()-1
 
 
 #ld = LoadData('game.csv')
