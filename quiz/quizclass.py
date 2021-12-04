@@ -5,14 +5,12 @@ import numpy as np
 import pandas as pd
 from storage.database import LoadData
 
-__version_ = 0.0006
+__version_ = 0.0007
 
 
 class Quiz(object):
-    def __init__(self,
-                 name_quiz_data_file,
-                 categories_num: int = 5):
-        self.ld = LoadData(name_quiz_data_file)
+    def __init__(self, categories_num: int = 5):
+        self.ld = LoadData()
         self.categories_num: int = categories_num
         self.unq_categories = np.arange(self.categories_num)
         self.all_categories_questions: list = []
@@ -85,7 +83,7 @@ class Quiz(object):
 
 
 if __name__ == "__main__":
-    q = Quiz(name_quiz_data_file='../storage/quiz.csv')
+    q = Quiz()
     q.choose_categories()
     q.prepare_questions()
     print(q.all_categories_questions)

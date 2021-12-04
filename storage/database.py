@@ -1,11 +1,12 @@
+import os
 import pandas as pd
-import numpy as np
 
-__version__ = 0.0004
+__version__ = 0.0005
 
 class LoadData:
-    def __init__(self, name):
-        self.db = pd.read_csv(name,
+    def __init__(self):
+        self.db_name = os.path.join('../storage', 'quiz.csv')
+        self.db = pd.read_csv(self.db_name,
                               delimiter=',',
                               usecols=['index',
                                        'cat_num',
@@ -33,7 +34,3 @@ class LoadData:
 
     def base_size(self):
         return self.db.category.count()-1
-
-
-#ld = LoadData('game.csv')
-#print(ld.get_data_by_index(1, 3))
