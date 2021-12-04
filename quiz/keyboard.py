@@ -4,7 +4,7 @@ from telebot import types
 
 class Keyboard(object):
     def __init__(self):
-        self.kb_table = types.ReplyKeyboardMarkup()
+        self.kb_table = types.InlineKeyboardMarkup()
         pass
 
     def fill_kb_table(self, table):
