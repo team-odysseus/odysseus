@@ -15,7 +15,7 @@ class Controller:
         while not self.game.is_over():
             self.game.player_move(7374768, choice=0)
             self.game.player_move(8347838, choice=1)
-            logging.info(f"Round {self.game.moveCount} is over")
+            logging.info(f"Round {self.game.round_index} is over")
             self.game.advance_round()
 
         self.game.finish()

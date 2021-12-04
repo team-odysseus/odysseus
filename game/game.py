@@ -10,13 +10,11 @@ MAX_PLAYERS = 2
 
 class Game:
     def __init__(self):
-        # TODO rename to round_index
-        self.moveCount = 0
+        self.round_index = 0
         self.players = list()
         self.start_iq = 100
         self.available_roles = [role.ROLE_GOOD, role.ROLE_BAD]
         self.rounds = [Round(), Round()]
-        # TODO remove and use iter
         self.current_round = None
         self.com = communications.ComConsole()
         self.history = dict()
@@ -44,8 +42,8 @@ class Game:
         pass
 
     def announce_round(self):
-        self.history[self.moveCount] = []
-        self.com.print_all(f"Round {self.moveCount} starts: " + self.current_round.get_round_description())
+        self.history[self.round_index] = []
+        self.com.print_all(f"Round {self.round_index} starts: " + self.current_round.get_round_description())
         for p in self.players:
             role_instruction = self.current_round.print_role_options(p.role)
             self.com.print_player(p.id, role_instruction)
@@ -58,11 +56,11 @@ class Game:
             self.com.print_all(stat + " is " + str(s_value))
 
     def player_move(self, player_id, choice: int):
-        self.history[self.moveCount].append([player_id, choice])
+        self.history[self.round_index].append([player_id, choice])
         for p in self.players:
             if p.id == player_id:
                 self.update_stats(p.role, p.iq, choice)
-        if len(self.history[self.moveCount]) == len(self.players):
+        if len(self.history[self.round_index]) == len(self.players):
             self.round_results()
 
     def update_stats(self, p_role, p_iq, choice: int):
@@ -70,15 +68,16 @@ class Game:
             self.stats[stat] += increment * p_iq / 100
 
     def advance_round(self):
+        self.round_index += 1
+
         if not self.is_over():
-            self.moveCount += 1
-            self.current_round = self.rounds[self.moveCount]
+            self.current_round = self.rounds[self.round_index]
             self.announce_round()
         else:
             self.current_round = None
 
     def is_over(self):
-        return not (self.moveCount + 1 < len(self.rounds))
+        return self.round_index >= len(self.rounds)
 
     def finish(self):
         self.com.print_all(f"Game is over. Result {self.stats}")
