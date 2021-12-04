@@ -25,11 +25,8 @@ class Game:
     def join(self, player_id):
         if len(self.available_roles) == 0:
             return False
-
         player_role = self.available_roles.pop()
-
         self.players.append(Player(player_id, self.start_iq, player_role))
-
         return True
 
     def is_ready(self):
