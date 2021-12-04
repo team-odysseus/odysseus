@@ -43,7 +43,7 @@ class Game:
         print("Round starts: " + self.current_round.common_description)
         for p in self.players:
             role_instruction = self.current_round.get_role_text(p.role)
-            print("Player instructions {}: {} ".format(p.id, role_instruction))
+            self.com.print_player(p.id, role_instruction)
 
     def player_move(self, player_id, answer):
         pass
