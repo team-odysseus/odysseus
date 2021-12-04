@@ -1,18 +1,23 @@
 import pandas as pd
 
 class Quiz(object):
+    def __init__(self):
+        self.ld = LoadData()
+        self.categories_num: int = 5
+        self.unq_categories = np.arange(self.categories_num)
+        pass
 
-    def __init__(self, price, topic):
+    def get_one_cat_questions(self):
 
-        self.price = price
-        self.topic = topic
-
-    def questions(self):
-        data = pd.read_csv('/content/drive/MyDrive/dataset/c.csv', index_col=0)
-        question = '123'
-        return question
+        pass
 
 
+    def choose_categories(self):
+        categories = self.ld.get_column('cat_num')
+        unq_categories, unq_counts = np.unique(categories, return_counts=True)
+        unq_categories = unq_categories[unq_counts >= 4]
+        self.unq_categories = random.sample(unq_categories, k=self.categories_num)
+        return unq_categories
 
 
 
