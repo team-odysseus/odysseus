@@ -15,6 +15,7 @@ bot.
 
 import logging
 
+import telegram.error
 from dotenv import load_dotenv, find_dotenv
 import os
 
@@ -33,21 +34,17 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-GENDER, PHOTO, LOCATION, BIO = range(4)
+bot = None
+
+# Map from user_id to chat_id with this user.
+chats = dict()
 
 
 def start(update: Update, context: CallbackContext) -> int:
-    """Starts the conversation and asks the user about their gender."""
-    reply_keyboard = [['Boy', 'Girl', 'Other']]
-
-    update.message.reply_text(
-        'Hi! My name is Professor Bot. I will hold a conversation with you. '
-        'Send /cancel to stop talking to me.\n\n'
-        'Are you a boy or a girl?',
-        reply_markup=ReplyKeyboardMarkup(
-            reply_keyboard, one_time_keyboard=True, input_field_placeholder='Boy or Girl?'
-        ),
-    )
+    if update is None or update.message is None or update.message.from_user is None:
+        return
+    chats[update.message.from_user.id] = update.message.chat_id
+    update.message.reply_text('Game started')
 
 
 def cancel(update: Update, context: CallbackContext) -> int:
@@ -60,14 +57,24 @@ def cancel(update: Update, context: CallbackContext) -> int:
 
 
 def on_text(update: Update, context: CallbackContext) -> int:
-    """Stores the info about the user and ends the conversation."""
+    if update is None or update.message is None:
+        return
     user = update.message.from_user
-    logger.info("Message from %s: %s", user.first_name, update.message.text)
+    text = update.message.text
+    logger.info("Message from %s: %s", user.id, text)
     update.message.reply_text('Thank you!')
+    for chat_id in chats.values():
+        if chat_id != chats[user.id]:
+            send_message(chat_id, text, ["Yes", "No"])
+            logger.info("Sent message to " + str(chat_id))
 
 
-def send_message(text, buttons: list(str)):
-    pass
+# Buttons is list of strings. Each string represents one button.
+def send_message(user_id, text, buttons=None):
+    try:
+        bot.send_message(chats[user_id], text)
+    except telegram.error.TelegramError:
+        logger.error("Failed to send message to " + str(user_id) + " " + text)
 
 
 def main() -> None:
@@ -82,10 +89,15 @@ def main() -> None:
     # Get the dispatcher to register handlers
     dispatcher = updater.dispatcher
 
+    dispatcher.add_handler(MessageHandler(Filters.regex(r'^/start$'), start))
     dispatcher.add_handler(MessageHandler(Filters.text, on_text))
 
     # Start the Bot
     updater.start_polling()
+
+    # Set global bot
+    global bot
+    bot = updater.bot
 
     # Run the bot until you press Ctrl-C or the process receives SIGINT,
     # SIGTERM or SIGABRT. This should be used most of the time, since
