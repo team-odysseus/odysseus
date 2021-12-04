@@ -8,16 +8,12 @@ class Keyboard(object):
         pass
 
     def fill_kb_table(self, table, table_type = 'table'):
-        i = 0
-        for row in table:
+        for i, row in enumerate(table):
             button_list = list()
-            j = 0
-            for cell in row:
-                button_list.append(types.InlineKeyboardButton(f'{cell}', callback_data=f'{table_type}{i}{j}'))
-                j += 1
+            for j, column in enumerate(row):
+                button_list.append(types.InlineKeyboardButton(f'{column}', callback_data=f'{table_type}{i}{j}'))
             self.kb_table.row(*button_list)
             print(button_list[0])
-            i += 1
         pass
 
     def get_instant(self):
