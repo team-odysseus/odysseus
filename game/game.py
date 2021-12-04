@@ -10,12 +10,14 @@ MAX_PLAYERS = 2
 
 class Game:
     def __init__(self):
+        # TODO rename to round_index
         self.moveCount = 0
         self.safety = 100
         self.players = list()
         self.start_iq = 100
         self.available_roles = [role.ROLE_GOOD, role.ROLE_BAD]
         self.rounds = [Round(), Round()]
+        # TODO remove and use iter
         self.current_round = None
         self.com = communications.ComConsole()
         self.history = dict()
@@ -42,7 +44,7 @@ class Game:
 
     def announce_round(self):
         self.history[self.moveCount] = []
-        self.com.print_all("Round starts: " + self.current_round.common_description)
+        self.com.print_all(f"Round {self.moveCount} starts: " + self.current_round.common_description)
         for p in self.players:
             role_instruction = self.current_round.get_role_text(p.role)
             self.com.print_player(p.id, role_instruction)
@@ -58,5 +60,20 @@ class Game:
         self.safety += answer["influence"]
         if len(self.history[self.moveCount]) == len(self.players):
             self.round_results()
+
+    def advance_round(self):
+        if not self.is_over():
+            self.moveCount += 1
+            self.current_round = self.rounds[self.moveCount]
+            self.announce_round()
+        else:
+            self.current_round = None
+
+    def is_over(self):
+        return not (self.moveCount + 1 < len(self.rounds))
+
+    def finish(self):
+        self.com.print_all(f"Game is over. Result {self.safety}")
+
 
 
