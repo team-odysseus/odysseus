@@ -18,8 +18,8 @@ class LoadData:
                               )
 
     def get_lines_by_category(self, category):
-        a = self.db[self.db.Category == category]
-        print(a)
+        cat_lines = self.db[self.db.Category == category]
+        return cat_lines
 
     def get_column(self, column):
         return self.db[column]
