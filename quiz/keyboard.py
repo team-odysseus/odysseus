@@ -10,11 +10,12 @@ class Keyboard(object):
     def fill_kb_table(self, table):
         i = 0
         for row in table:
+            button_list = list()
             j = 0
             for cell in row:
-                button = types.InlineKeyboardButton(f'{cell}', callback_data=f'btn{i}{j}')
+                button_list.append(types.InlineKeyboardButton(f'{cell}', callback_data=f'btn{i}{j}'))
                 j += 1
-                self.kb_table.add(button)
+            self.kb_table.row(*button_list)
             i += 1
         pass
 
@@ -33,7 +34,15 @@ def main():
                             ['Тема 5', 100, 200, 300, 400]])
 
 
-
+    @bot.callback_query_handler(func=lambda callback_data: True)
+    def callback_worker(callback_data):
+        print(callback_data.data)
+        code = callback_data.data[-2]
+        if code.isdigit():
+            code = int(code)
+            row = code // 10
+            col = code % 10
+        bot.answer_callback_query(callback_data.id)
 
     @bot.message_handler(commands=['start', 'rm'])
     def process_start_command(message):
@@ -44,15 +53,7 @@ def main():
         if message.text == '/rm':
             bot.send_message(message.from_user.id, "rm", reply_markup=types.ReplyKeyboardRemove())
 
-    @bot.callback_query_handler(func=lambda callback_data: True)
-    def callback_worker(callback_data):
-        print(callback_data.data)
-        code = callback_data.data[-2]
-        if code.isdigit():
-            code = int(code)
-            row = code // 10
-            col = code % 10
-        bot.answer_callback_query(callback_data.id)
+
 
 
 
