@@ -8,14 +8,14 @@ STAT_2_KEY = 'money'
 COM_DESCR_KEY = "common_description"
 
 
-def load_rounds():
+def load_rounds(csv_location='tests/test_scenario_2.csv'):
     scenario = []
     round_d = dict()
     role_d = dict()
     choices_d = []
     choice_d = dict()
 
-    data = pd.read_csv('tests/test_scenario_2.csv')
+    data = pd.read_csv(csv_location)
     for r_number in range(1, data.round_index.max()+1):
         d = data[data.round_index == r_number]
         for role_i in ROLE_GOOD, ROLE_BAD:
@@ -36,4 +36,4 @@ def load_rounds():
     return scenario
 
 if __name__ == "__main__":
-    print(load_rounds())
+    print(load_rounds('../tests/test_scenario_2.csv'))

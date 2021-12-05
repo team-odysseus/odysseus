@@ -35,9 +35,9 @@ class Round:
         i = 0
         choices_text = []
         for choice in choices:
-            choices_text.append(str(i) + " : " + choice[TEXT_KEY])
+            choices_text.append("\n" + str(i) + " : " + choice[TEXT_KEY])
             i += 1
-        return self.get_role_text(r_role) + " Your options: " + ", ".join(choices_text)
+        return self.get_role_text(r_role) + "\nВарианты хода:" + "".join(choices_text)
 
     def get_choice_stat(self, r_role, choice):
         stats = self.config[r_role][CHOICES_KEY][choice]
