@@ -97,7 +97,6 @@ class QuizMain(object):
                 pass
 
 
-
         def show_question_and_answers(callback_data):
             question_msg, answers_list = self.quiz.get_question_and_answers(self.button_row_idx, self.button_col_idx-1)
             print(answers_list)
