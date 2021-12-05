@@ -41,11 +41,12 @@ class ScoreBoard(object):
 
     # DEF: return DataFrame with best 10 places
     def get_hiscore(self):
-        msg = f'Таблица топ-{self.score_len} участников с лучшими результатами\n'
+        msg = f'Таблица топ-{self.score_len} участников с лучшими результатами:\n\n'
         for i, row in enumerate(self.score_df.values[:self.score_len+1]):
-            msg += f"{i+1}  :{row[1]} : {row[4]}\n"
+            msg += f"{(i + 1):<5} {row[1]:<20} {row[4]:<20}\n"
 #        print(msg)
         return msg
+
 
 # if __name__ == "__main__":
 #     s = ScoreBoard()
