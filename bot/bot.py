@@ -27,6 +27,9 @@ from telegram.ext import (
     CallbackContext,
 )
 
+from bot.auth import Auth
+import bot.auth as auth
+
 # Enable logging
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
@@ -35,7 +38,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 bot = None
+updater = None
 controller = None
+auth = Auth()
 
 # Map from user_id to chat_id with this user.
 chats = dict()
@@ -52,6 +57,11 @@ def start(update: Update, context: CallbackContext) -> int:
     player_id = update.message.from_user.id
     chats[player_id] = update.message.chat_id
 
+    auth.authorize(update)
+
+    if auth.get_rights(player_id) < auth.PLAY_RIGHTS:
+        update.message.reply_text("Нет прав доступа!")
+
     if controller.player_start(player_id):
         update.message.reply_text('Joined')
     else:
@@ -64,7 +74,11 @@ def on_message(update: Update, context: CallbackContext) -> int:
     user = update.message.from_user
     text = update.message.text
     logger.info("Message from %s: %s", user.id, text)
-    controller.player_message(user.id, text)
+
+    if auth.get_rights(user.id) < auth.PLAY_RIGHTS:
+        update.message.reply_text("Нет прав доступа!")
+    else:
+        controller.player_message(user.id, text)
 
 
 # Buttons is list of strings. Each string represents one button.
@@ -82,6 +96,7 @@ def bot_main() -> None:
     """Run the bot."""
     # Create the Updater and pass it your bot's token.
 
+    global updater
     updater = Updater(my_token)
 
     # Get the dispatcher to register handlers
