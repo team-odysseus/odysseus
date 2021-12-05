@@ -103,7 +103,9 @@ class QuizMain(object):
                 self.bot.answer_callback_query(callback_data.id)
                 pass
             elif callback_data.data.startswith('answer'):
-
+                if self.agents[callback_data.from_user.id].status != 2:
+                    self.bot.send_message(callback_data.message.chat.id, "Таблица устарела!")
+                    return
                 keyboard = Keyboard()
                 keyboard.fill_kb_table(self.agents[callback_data.from_user.id].create_rows_cols_pic_box())
                 code = callback_data.data[-2:]
@@ -130,7 +132,6 @@ class QuizMain(object):
                                           reply_markup=keyboard.get_instant())
                 self.agents[callback_data.from_user.id].status = 1
                 if self.agents[callback_data.from_user.id].end_game_flag:
-                    self.agents[callback_data.from_user.id].status = 0
                     self.end_of_the_game(callback_data)
 
         def show_question_and_answers(callback_data):
