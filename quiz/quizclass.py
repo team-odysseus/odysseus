@@ -1,11 +1,12 @@
 import random
 import numpy as np
 import pandas as pd
+from io import BytesIO
 from typing import Tuple
 from storage.database import LoadData
 from PIL import Image, ImageDraw, ImageFont
 
-__version_ = 0.0011
+__version_ = 0.0012
 
 
 class Quiz(object):
@@ -43,6 +44,7 @@ class Quiz(object):
     def get_one_cat_questions(self, cat_num):
         questions = self.ld.get_lines_by_category(cat_num)
         questions_out = questions.sample(n=4, random_state=42)
+        questions_out = questions_out.sort_values('score')
         return questions_out
 
     def choose_categories(self) -> None:
@@ -64,6 +66,7 @@ class Quiz(object):
     def prepare_questions(self):
         all_categories_questions_idxs: list = []
         for cat_num in self.unq_categories:
+
             cat_questions = self.get_one_cat_questions(cat_num)
             cat_questions_idxs = cat_questions.index.tolist()
             self.all_categories_questions.append(cat_questions)
@@ -86,7 +89,7 @@ class Quiz(object):
                 row_list.append(str(q_a['score'].item()))
             else:
                 row_list.append('-')
-            # TODO sort by score
+
             for cols_idx in range(1, self.q_a_matrix_cols):
                 if not self.all_categories_questions_used[row_idx, cols_idx]:
                     q_a = self.get_q_a(row_idx, cols_idx)
@@ -145,7 +148,10 @@ class Quiz(object):
     def get_user_stats(self):
         return self.user_route, self.user_score
 
+
     def get_board_pic(self, pic_matrix):
+        bio = BytesIO()
+        bio.name = 'image.jpeg'
         h, k = 300, 7
         step = int(h / 5)
         w = step * k
@@ -166,7 +172,9 @@ class Quiz(object):
                 draw.text((step * n + int(step / 2) - 5, step * i + int(step / 2) - 5), str(question), font=unicode_font,
                           fill=(243, 244, 175, 0))
 
-        return im
+        im.save(bio, 'JPEG')
+        bio.seek(0)
+        return bio
 
 if __name__ == "__main__":
     q = Quiz()
@@ -174,8 +182,6 @@ if __name__ == "__main__":
     print(q.get_q_a(2, 3))
     pic_list, _ = q.create_rows_cols_pic_box()
     pic = q.get_board_pic(pic_list)
-    pic.show()
     print(q.get_question_and_answers(2, 3))
-    print(q.check_answer(2, 3, 2))
     print(pic_list)
-    print()
+
