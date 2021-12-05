@@ -4,6 +4,7 @@ import role
 from player import Player
 from round import Round
 import communications
+from csv_reader import load_rounds
 
 MAX_PLAYERS = 2
 
@@ -14,7 +15,7 @@ class Game:
         self.players = list()
         self.start_iq = 100
         self.available_roles = [role.ROLE_GOOD, role.ROLE_BAD]
-        self.rounds = [Round(), Round()]
+        self.rounds = self.load_game()
         self.current_round = None
         self.com = communications.ComConsole()
         self.history = dict()
@@ -78,6 +79,14 @@ class Game:
 
     def finish(self):
         self.com.print_all(f"Game is over. Result {self.stats}")
+
+    def load_game(self):
+        dict_list = load_rounds()
+        rounds_list = list()
+        for d in dict_list:
+            rounds_list.append(Round(d))
+        return rounds_list
+
 
 
 

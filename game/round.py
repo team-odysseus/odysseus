@@ -4,7 +4,10 @@ TEXT_KEY = "text"
 CHOISES_KEY = "choices"
 
 class Round:
-    def __init__(self):
+    def __init__(self, _dict=None):
+        if _dict is not None:
+            self.config = _dict
+            return
         self.config = {"common_description": "Hello, round starts",
                        "good": {"text": "You should change password.",
                                 "choices": [{"text": "Choice A",
@@ -18,10 +21,6 @@ class Round:
                                             "safety": -10},
                                            {"text": "Kill one",
                                             "safety": -50}]}}
-        pass
-
-    def load(self, file):
-        pass
 
     def get_round_description(self):
         return self.config['common_description']
