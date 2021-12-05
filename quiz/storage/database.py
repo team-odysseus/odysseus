@@ -6,7 +6,7 @@ __version__ = 0.0005
 
 class LoadData:
     def __init__(self):
-        self.db_name = os.path.join('../storage', 'quiz.csv')
+        self.db_name = os.path.join('storage', 'quiz.csv')
         self.db = pd.read_csv(self.db_name,
                               delimiter=',',
                               usecols=['index',

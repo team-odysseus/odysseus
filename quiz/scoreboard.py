@@ -2,12 +2,12 @@ import os
 import pandas as pd
 from userclass import User
 
-__version_ = 0.0003
+__version__ = 0.0004
 
 
 class ScoreBoard(object):
     def __init__(self):
-        self.filename = os.path.join('..', 'storage', 'score.csv')
+        self.filename = os.path.join('storage', 'score.csv')
         self.columns = ['user_id',
                         'user_name',
                         'phone',
