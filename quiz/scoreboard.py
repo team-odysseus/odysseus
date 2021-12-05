@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from userclass import User
 
-__version__ = 0.0004
+__version__ = 0.0005
 
 
 class ScoreBoard(object):
@@ -13,7 +13,7 @@ class ScoreBoard(object):
                         'phone',
                         'time',
                         'score']
-        self.score_len = 10
+        self.score_len = 15
         if not os.path.exists(self.filename):
             self.score_df = pd.DataFrame(columns=self.columns)
         else:
@@ -31,7 +31,7 @@ class ScoreBoard(object):
                                      })
 
         self.score_df = self.score_df.append(score_row_df, ignore_index=True)
-        self.score_df = self.score_df.sort_values(by='score')
+        self.score_df = self.score_df.sort_values(by='score', ascending=False)
         pass
 
     # DEF: save to CSV file users score
@@ -41,6 +41,7 @@ class ScoreBoard(object):
 
     # DEF: return DataFrame with best 10 places
     def get_hiscore(self):
+        self.score_df = self.score_df.sort_values(by='score', ascending=False)
         msg = f'Таблица топ-{self.score_len} участников с лучшими результатами:\n\n'
         for i, row in enumerate(self.score_df.values[:self.score_len+1]):
             msg += f"{(i + 1):<5} {row[1]:<20} {row[4]:<20}\n"
