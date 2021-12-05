@@ -4,7 +4,7 @@ import pandas as pd
 from database import LoadData
 from userclass import User
 
-__version_ = 0.0016
+__version_ = 0.0017
 
 
 class Quiz(object):
@@ -142,7 +142,8 @@ class Quiz(object):
         user_answer_data.update({int(q_a.index.item()): answer_data})
         self.user_route.update({self.questions_count: user_answer_data})
         # print(self.user_route)
-        if not np.count_nonzero(self.all_categories_questions_used):
+        have_questions = np.count_nonzero(self.all_categories_questions_used)
+        if have_questions == self.q_a_matrix_rows*self.q_a_matrix_cols:
             self.end_game_flag = True
         full_answer = q_a['comment'].item()
         return is_answer_correct, user_answer_msg, correct_answer_msg, full_answer

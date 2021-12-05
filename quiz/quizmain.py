@@ -10,15 +10,13 @@ from telebot import types
 import datetime
 import logging
 
-__version__ = 0.0009
+__version__ = 0.0011
+
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
 STORAGE_PATH = os.getcwd()
 logging.FileHandler(os.path.join(STORAGE_PATH, 'log.log'))
 
-hello_msg = "Привет, я Одиссей, чат-бот созданный для обучения кибербезопасности. " \
-                        "Я помогу Вам защитится от троянов!\n" \
-                        "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n\n" \
-                        "Для того чтобы вы могли начать сообщите свой контакт нажав на кноку внизу "
+
 
 class QuizMain(object):
     def __init__(self):
@@ -29,9 +27,14 @@ class QuizMain(object):
         self.button_row_idx = 0
         self.button_col_idx = 0
         self.sc = ScoreBoard()
+        self.hello_msg = "Привет, я Одиссей, чат-бот созданный для обучения кибербезопасности. " \
+                         "Я помогу Вам защитится от троянов!\n" \
+                         "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n\n" \
+                         "Для того чтобы вы могли начать сообщите свой контакт нажав на кноку внизу "
         pass
 
     def main(self):
+
         @self.bot.message_handler(commands=['start', 'help', 'board', 'exit'])
         def process_start_command(message):
             logging.info(f'MSG : {message.from_user.id} : {message.text}')
@@ -41,12 +44,11 @@ class QuizMain(object):
                     self.agents.update({message.from_user.id: Quiz()})
                     keyboard = Keyboard('Reply')
                     keyboard.fill_kb_table([['Отправить контакт']], 'contact')
-                    self.bot.send_message(message.from_user.id, hello_msg, reply_markup=keyboard.get_instant())
+                    self.bot.send_message(message.from_user.id, self.hello_msg, reply_markup=keyboard.get_instant())
                     self.bot.register_next_step_handler(message, get_number)
                 else:
-                    self.bot.send_message(message.from_user.id, 'Прежде чем начать заново закончите текущую сессию '
-                                                                '/exit')
-
+                    self.bot.send_message(message.from_user.id, 'Прежде чем начать заново закончите текущую сессию /exit')
+                    return
             elif message.text == '/help':
                 help_msg = "Доступные команды: \n" \
                            "/help - эта справка\n" \
@@ -72,7 +74,7 @@ class QuizMain(object):
                 keyboard = Keyboard('Reply')
                 keyboard.fill_kb_table([['Отправить контакт']], 'contact')
                 self.bot.send_message(message.from_user.id, "Нужно нажать на кнопку и подтвердить передачу контакта.")
-                self.bot.send_message(message.from_user.id, hello_msg, reply_markup=keyboard.get_instant())
+                self.bot.send_message(message.from_user.id, self.hello_msg, reply_markup=keyboard.get_instant())
                 self.bot.register_next_step_handler(message, get_number)
             else:
                 keyboard = Keyboard()
@@ -94,7 +96,7 @@ class QuizMain(object):
                 return
             if callback_data.data.startswith('table'):
                 if self.agents[callback_data.from_user.id].status != 1:
-                    self.bot.send_message(callback_data.message.chat.id, "Таблица устарела!")
+                    self.bot.send_message(callback_data.message.chat.id, "Выберите ответ на вопрос!")
                     return
                 code = callback_data.data[-2:]
                 if code.isdigit():
@@ -109,7 +111,7 @@ class QuizMain(object):
                 pass
             elif callback_data.data.startswith('answer'):
                 if self.agents[callback_data.from_user.id].status != 2:
-                    self.bot.send_message(callback_data.message.chat.id, "Таблица устарела!")
+                    self.bot.send_message(callback_data.message.chat.id, "Выберите категорию и цену вопроса!")
                     return
                 keyboard = Keyboard()
                 keyboard.fill_kb_table(self.agents[callback_data.from_user.id].create_rows_cols_pic_box())
