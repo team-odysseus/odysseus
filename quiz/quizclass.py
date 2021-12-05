@@ -74,7 +74,7 @@ class Quiz(object):
         self.all_categories_questions_idxs = np.asarray(all_categories_questions_idxs)
         pass
 
-    def create_rows_cols_pic_box(self) -> Tuple[list, np.array]:
+    def create_rows_cols_pic_box(self):
         """
         Returns:
             pic_matrix (list):      list of lists with str for buttons and picture creating
@@ -97,7 +97,7 @@ class Quiz(object):
                 else:
                     row_list.append('-')
             pic_matrix.append(row_list)
-        return pic_matrix, self.all_categories_questions_idxs
+        return pic_matrix
 
     def get_q_a(self, row_idx, col_idx) -> pd.DataFrame:
         question_idx = self.all_categories_questions_idxs[row_idx, col_idx]
