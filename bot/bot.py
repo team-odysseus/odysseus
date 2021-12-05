@@ -28,7 +28,7 @@ from telegram.ext import (
 )
 
 from bot.auth import Auth
-import bot.auth as auth
+import bot.auth as auth_module
 
 # Enable logging
 logging.basicConfig(
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 bot = None
 updater = None
 controller = None
-auth = Auth()
+_auth = Auth()
 
 # Map from user_id to chat_id with this user.
 chats = dict()
@@ -57,9 +57,9 @@ def start(update: Update, context: CallbackContext) -> int:
     player_id = update.message.from_user.id
     chats[player_id] = update.message.chat_id
 
-    auth.authorize(update)
+    _auth.authorize(update)
 
-    if auth.get_rights(player_id) < auth.PLAY_RIGHTS:
+    if _auth.get_rights(player_id) < auth_module.PLAY_RIGHTS:
         update.message.reply_text("Нет прав доступа!")
 
     if controller.player_start(player_id):
@@ -75,7 +75,7 @@ def on_message(update: Update, context: CallbackContext) -> int:
     text = update.message.text
     logger.info("Message from %s: %s", user.id, text)
 
-    if auth.get_rights(user.id) < auth.PLAY_RIGHTS:
+    if _auth.get_rights(user.id) < auth_module.PLAY_RIGHTS:
         update.message.reply_text("Нет прав доступа!")
     else:
         controller.player_message(user.id, text)
