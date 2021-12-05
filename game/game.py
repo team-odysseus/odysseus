@@ -18,8 +18,7 @@ class Game:
         self.current_round = None
         self.com = None
         self.history = dict()
-        self.stats = {"safety": 100,
-                      "money": 10000}
+        self.stats = {"safety": 100}
         logging.info("Game created")
 
     def join(self, player_id):
