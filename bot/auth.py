@@ -12,6 +12,10 @@ from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
 import bot.bot
 
 NO_RIGHTS, DENIED, PLAY_RIGHTS, ADMIN_RIGHTS = range(4)
+rights_text = { NO_RIGHTS: "не определено",
+                DENIED: "нет доступа",
+                PLAY_RIGHTS: "игрок",
+                ADMIN_RIGHTS: "администратор"}
 
 
 class Auth:
@@ -20,6 +24,8 @@ class Auth:
         self.phone_handler = MessageHandler(Filters.contact, self.phone_given)
 
     def get_rights(self, user_id):
+        if user_id in self.access_rights:
+            return self.access_rights[user_id]
         return NO_RIGHTS
 
     def register(self, update):
@@ -41,12 +47,17 @@ class Auth:
         logging.info("Got user phone: " + phone_number)
         level = PLAY_RIGHTS
         self.access_rights[contact.user_id] = level
-        update.message.reply_text(
-            'Ваш доступ: ' + str(level),
-            reply_markup=ReplyKeyboardRemove)
+
+        if level > DENIED:
+            update.message.reply_text(
+                'Ваш доступ: ' + rights_text[level] + ", нажмите для продолжения: /start")
 
     def authorize(self, update: Update):
         user_id = update.message.from_user.id
 
         if NO_RIGHTS == self.get_rights(user_id):
             self.register(update)
+            # No registration yet
+            return False
+        # Registration complete
+        return True

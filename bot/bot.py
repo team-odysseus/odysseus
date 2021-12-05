@@ -57,10 +57,14 @@ def start(update: Update, context: CallbackContext) -> int:
     player_id = update.message.from_user.id
     chats[player_id] = update.message.chat_id
 
-    _auth.authorize(update)
+    if not _auth.authorize(update):
+        # No authorization
+        return
 
+    # Authorization status available
     if _auth.get_rights(player_id) < auth_module.PLAY_RIGHTS:
         update.message.reply_text("Нет прав доступа!")
+        return
 
     if controller.player_start(player_id):
         update.message.reply_text('Joined')
@@ -77,8 +81,8 @@ def on_message(update: Update, context: CallbackContext) -> int:
 
     if _auth.get_rights(user.id) < auth_module.PLAY_RIGHTS:
         update.message.reply_text("Нет прав доступа!")
-    else:
-        controller.player_message(user.id, text)
+        return
+    controller.player_message(user.id, text)
 
 
 # Buttons is list of strings. Each string represents one button.
