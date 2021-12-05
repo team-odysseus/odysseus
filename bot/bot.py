@@ -53,9 +53,9 @@ def start(update: Update, context: CallbackContext) -> int:
     chats[player_id] = update.message.chat_id
 
     if controller.player_start(player_id):
-        update.message.reply_text('Joined')
+        update.message.reply_text('Вы присоединились к игре')
     else:
-        update.message.reply_text('Cannot join')
+        update.message.reply_text('Присоединиться не удалось\nВозможно, достигнуто максимальное количество игроков.\nПопробуйте позже.')
 
 
 def on_message(update: Update, context: CallbackContext) -> int:
