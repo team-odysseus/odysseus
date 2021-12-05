@@ -7,7 +7,7 @@ __version__ = 0.0004
 
 class ScoreBoard(object):
     def __init__(self):
-        self.filename = os.path.join('storage', 'score.csv')
+        self.filename = os.path.join(os.getcwd(), 'score.csv')
         self.columns = ['user_id',
                         'user_name',
                         'phone',

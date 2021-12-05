@@ -1,7 +1,7 @@
 import random
 import numpy as np
 import pandas as pd
-from storage.database import LoadData
+from database import LoadData
 from userclass import User
 
 __version_ = 0.0016
