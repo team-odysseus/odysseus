@@ -10,7 +10,7 @@ import logging
 
 __version__ = 0.0009
 logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
-logging.FileHandler('log.log')
+logging.FileHandler('storage/log.log')
 hello_msg = "Привет, я Одиссей, чат-бот созданный для обучения кибербезопасности. " \
                         "Я помогу Вам защитится от троянов!\n" \
                         "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n\n" \
