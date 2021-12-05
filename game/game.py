@@ -59,13 +59,25 @@ class Game:
 
     def player_move(self, player_id, choice: int):
         # TODO: check choice is valid
-        self.history[self.round_index].append([player_id, choice])
-        for p in self.players:
-            if p.id == player_id:
-                self.update_stats(p.role, p.iq, choice)
-        if len(self.history[self.round_index]) == len(self.players):
-            self.round_results()
-            self.advance_round()
+        if self.move_validation(player_id):
+            self.history[self.round_index].append([player_id, choice])
+            for p in self.players:
+                if p.id == player_id:
+                    self.update_stats(p.role, p.iq, choice)
+            if len(self.history[self.round_index]) == len(self.players):
+                self.round_results()
+                self.advance_round()
+        else:
+            self.com.print_player(player_id, "Пожалуйста, дождитесь соперника.")
+
+    def move_validation(self, player_id):
+        if not self.history:
+            return False
+        else:
+            for move in self.history[self.round_index]:
+                if move[0] == player_id:
+                    return False
+            return True
 
     def update_stats(self, p_role, p_iq, choice: int):
         for stat, increment in self.current_round.get_choice_stat(p_role, choice).items():
