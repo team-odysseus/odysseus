@@ -34,6 +34,6 @@ gh repo clone team-odysseus/odysseus
 
 ◦ conda activate odysseus-base
 
-Запуск проекта:
+Запуск первой части:
 cd "путь_к_папке_с_проектом"/quiz
 python quizmain.py
