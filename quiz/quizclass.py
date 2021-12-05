@@ -1,22 +1,11 @@
 import random
 import numpy as np
 import pandas as pd
-# from io import BytesIO
-from typing import Tuple
 from storage.database import LoadData
-from dataclasses import dataclass
-import datetime
-# from PIL import Image, ImageDraw, ImageFont
+from userclass import User
 
-__version_ = 0.0013
+__version_ = 0.0015
 
-@dataclass
-class User:
-    id: int = 0
-    name: str = ''
-    phone: str = ''
-    time = datetime.datetime.now()
-    score: int = 0
 
 class Quiz(object):
     def __init__(self, categories_num: int = 5):
@@ -133,7 +122,7 @@ class Quiz(object):
         question = q_a.question.item()
         return question, answers_list
 
-    def check_answer(self, answer_num) -> Tuple[bool, str, str]:
+    def check_answer(self, answer_num):
         is_answer_correct = False
         q_a = self.get_q_a(self.question_row_idx, self.question_col_idx)
         if self.current_answers_random_order[answer_num] == 0:
@@ -160,39 +149,12 @@ class Quiz(object):
         return self.user_route, self.user_score
 
 
-    # def get_board_pic(self, pic_matrix):
-    #     bio = BytesIO()
-    #     bio.name = 'image.jpeg'
-    #     h, k = 300, 7
-    #     step = int(h / 5)
-    #     w = step * k
-    #     im = Image.new('RGB', (w, h), (49, 140, 231))
-    #     draw = ImageDraw.Draw(im)
-    #     font_size = 12
-    #     unicode_font = ImageFont.truetype("DejaVuSans.ttf", font_size)
-    #
-    #     for i in range(0, 6):
-    #         draw.line((0, step * i, w, step * i), fill='white', width=1)
-    #         for i in range(3, k + 1):
-    #             draw.line((step * i - 1, 0, step * i - 1, h), fill='white', width=1)
-    #             draw.line((0, 0, 0, h), fill='white', width=1)
-    #
-    #     for cat, i in zip(pic_matrix, range(0, k)):
-    #         draw.text((10, step * i + int(step / 2) - 5), str(cat[0]), font=unicode_font, fill=(255, 255, 255, 0))
-    #         for question, n in zip(cat[1:], range(3, k + 1)):
-    #             draw.text((step * n + int(step / 2) - 5, step * i + int(step / 2) - 5), str(question), font=unicode_font,
-    #                       fill=(243, 244, 175, 0))
-    #
-    #     im.save(bio, 'JPEG')
-    #     bio.seek(0)
-    #     return bio
-
 if __name__ == "__main__":
     q = Quiz()
     print(q.all_categories_questions)
     print(q.get_q_a(2, 3))
     pic_list, _ = q.create_rows_cols_pic_box()
-    pic = q.get_board_pic(pic_list)
-    print(q.get_question_and_answers(2, 3))
+    # pic = q.get_board_pic(pic_list)
+    # print(q.get_question_and_answers(2, 3))
     print(pic_list)
 

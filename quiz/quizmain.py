@@ -1,9 +1,11 @@
-from keyboard import Keyboard
 from quizclass import Quiz
+from keyboard import Keyboard
+from scoreboard import ScoreBoard
 import telebot
 from telebot import types
+import datetime
 
-__version__ = 0.0006
+__version__ = 0.0009
 
 
 class QuizMain(object):
@@ -14,6 +16,8 @@ class QuizMain(object):
         self.message_to_send = str()
         self.button_row_idx = 0
         self.button_col_idx = 0
+        self.sc = ScoreBoard()
+        pass
 
     def main(self):
         @self.bot.message_handler(commands=['start', 'help', 'board', 'exit'])
@@ -31,6 +35,7 @@ class QuizMain(object):
                 keyboard.fill_kb_table([['Отправить контакт']], 'contact')
                 self.bot.send_message(message.from_user.id, hello_msg, reply_markup=keyboard.get_instant())
                 self.bot.register_next_step_handler(message, get_number)
+
             elif message.text == '/help':
                 help_msg = "Доступные команды: \n" \
                             "/help - эта справка\n" \
@@ -48,10 +53,17 @@ class QuizMain(object):
 
         def get_number(message):
             keyboard = Keyboard()
+
+            """ For testing purpose """
             print('message', message.from_user.id)
+            """ ------------------- """
             keyboard.fill_kb_table(self.agents[message.from_user.id].create_rows_cols_pic_box())
             self.bot.send_message(message.from_user.id, "Спасибо!", reply_markup=types.ReplyKeyboardRemove())
             self.bot.send_message(message.from_user.id, "Выберите вопрос:", reply_markup=keyboard.get_instant())
+            self.agents[message.from_user.id].user_data.id = message.from_user.id
+            self.agents[message.from_user.id].user_data.name = message.from_user.username
+            self.agents[message.from_user.id].user_data.phone = message.from_user.json['contact']['phone_number']
+            self.agents[message.from_user.id].user_data.time = datetime.datetime.now()
 
         @self.bot.callback_query_handler(func=lambda callback_data: True)
         def callback_worker(callback_data):
@@ -94,9 +106,6 @@ class QuizMain(object):
                     self.bot.send_message(callback_data.message.chat.id, full_answer, reply_markup=keyboard.get_instant())
                 if self.agents[callback_data.from_user.id].end_game_flag:
                     self.end_of_the_game(callback_data)
-            elif callback_data.data == 'contact':
-
-                pass
 
         def show_question_and_answers(callback_data):
             question_msg, answers_list = self.agents[callback_data.from_user.id].get_question_and_answers(
@@ -108,7 +117,6 @@ class QuizMain(object):
                     f"Вопрос №{self.agents[callback_data.message.chat.id].questions_count}\n{question_msg}",
                     reply_markup=kb.get_instant())
             pass
-
         self.bot.polling(none_stop=True, interval=0)
         pass
 
@@ -123,6 +131,12 @@ class QuizMain(object):
                    "Чтобы набрать больше баллов отвечайте на все вопросы.\n"
         msg += f"Ваш результат в игре: {self.agents[message.from_user.id].user_score} очков"
         self.bot.send_message(message.from_user.id, msg)
+        time_elapsed = datetime.datetime.now() - self.agents[message.from_user.id].user_data.time
+        self.agents[message.from_user.id].user_data.time = time_elapsed
+        self.agents[message.from_user.id].user_data.score = self.agents[message.from_user.id].user_data.score
+        """ Warning! Save user data before delete """
+        self.sc.add_data(self.agents[message.from_user.id].user_data)
+        self.sc.save_data()
         self.agents.pop(message.from_user.id)
         pass
 
