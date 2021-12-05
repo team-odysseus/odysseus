@@ -5,7 +5,7 @@ from game.player import Player
 from game.round import Round
 from game.csv_reader import load_rounds
 
-MAX_PLAYERS = 1
+MAX_PLAYERS = 2
 translate_keys = {"safety": "Кибер-безопасность компании",
                   role.ROLE_GOOD: "Сотрудник компании",
                   role.ROLE_BAD: "Кибер-злодей"}
