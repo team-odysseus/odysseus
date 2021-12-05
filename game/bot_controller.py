@@ -4,9 +4,13 @@ from game.game import Game
 
 class BotController:
     def __init__(self, _com):
+        self.game = None
+        self.com = _com
+        self.game_restart()
+
+    def game_restart(self):
         self.game = Game()
-        self.game.com = _com
-        pass
+        self.game.com = self.com
 
     def player_start(self, player_id):
         joined = self.game.join(player_id)
@@ -16,5 +20,9 @@ class BotController:
         return joined
 
     def player_message(self, player_id, text):
-        self.game.player_move(player_id, choice=int(text))
+        try:
+            self.game.player_move(player_id, choice=int(text))
+        except ValueError:
+            pass
+
 

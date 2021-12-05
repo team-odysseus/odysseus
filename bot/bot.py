@@ -42,6 +42,12 @@ def set_bot_controller(_controller):
     controller = _controller
 
 
+def restart(update: Update, context: CallbackContext) -> int:
+    if update is None or update.message is None or update.message.from_user is None:
+        return
+    controller.game_restart()
+
+
 def start(update: Update, context: CallbackContext) -> int:
     if update is None or update.message is None or update.message.from_user is None:
         return
@@ -60,7 +66,8 @@ def start(update: Update, context: CallbackContext) -> int:
     if controller.player_start(player_id):
         update.message.reply_text('Вы присоединились к игре')
     else:
-        update.message.reply_text('Присоединиться не удалось\nВозможно, достигнуто максимальное количество игроков.\nПопробуйте позже.')
+        update.message.reply_text(
+            'Присоединиться не удалось\nВозможно, достигнуто максимальное количество игроков.\nПопробуйте позже.')
 
 
 def on_message(update: Update, context: CallbackContext) -> int:
@@ -97,6 +104,7 @@ def bot_main() -> None:
     dispatcher = updater.dispatcher
 
     dispatcher.add_handler(MessageHandler(Filters.regex(r'^/start$'), start))
+    dispatcher.add_handler(MessageHandler(Filters.regex(r'^/restart$'), restart))
     dispatcher.add_handler(MessageHandler(Filters.text, on_message))
 
     # Start the Bot

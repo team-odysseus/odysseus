@@ -58,15 +58,15 @@ class Game:
             self.com.print_all(translate_keys[stat] + " становится " + str(s_value))
 
     def player_move(self, player_id, choice: int):
-        # TODO: check choice is valid
         if self.move_validation(player_id):
-            self.history[self.round_index].append([player_id, choice])
-            for p in self.players:
-                if p.id == player_id:
-                    self.update_stats(p.role, p.iq, choice)
-            if len(self.history[self.round_index]) == len(self.players):
-                self.round_results()
-                self.advance_round()
+            if choice in range(2):
+                self.history[self.round_index].append([player_id, choice])
+                for p in self.players:
+                    if p.id == player_id:
+                        self.update_stats(p.role, p.iq, choice)
+                if len(self.history[self.round_index]) == len(self.players):
+                    self.round_results()
+                    self.advance_round()
         else:
             self.com.print_player(player_id, "Пожалуйста, дождитесь соперника.")
 
@@ -97,7 +97,7 @@ class Game:
         return self.round_index >= len(self.rounds)
 
     def finish(self):
-        self.com.print_all(f"Игра завершена.\nРезультат:\n")
+        self.com.print_all(f"Игра завершена.\nНачать игру заново: /restart, присоединиться: /start\nРезультат:\n")
         for stat, s_value in self.stats.items():
             self.com.print_all(translate_keys[stat] + " : " + str(s_value))
 
