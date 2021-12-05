@@ -143,7 +143,8 @@ class Quiz(object):
         # print(self.user_route)
         if not np.count_nonzero(self.all_categories_questions_used):
             self.end_game_flag = True
-        return is_answer_correct, user_answer_msg, correct_answer_msg
+        full_answer = q_a['comment'].item()
+        return is_answer_correct, user_answer_msg, correct_answer_msg, full_answer
 
     def get_user_stats(self):
         return self.user_route, self.user_score
