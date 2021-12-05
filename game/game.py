@@ -6,6 +6,9 @@ from game.round import Round
 from game.csv_reader import load_rounds
 
 MAX_PLAYERS = 2
+translate_keys = {"safety": "Кибер-безопасность компании",
+                  role.ROLE_GOOD: "Сотрудник компании",
+                  role.ROLE_BAD: "Кибер-злодей"}
 
 
 class Game:
@@ -18,8 +21,7 @@ class Game:
         self.current_round = None
         self.com = None
         self.history = dict()
-        self.stats = {"safety": 100,
-                      "money": 10000}
+        self.stats = {"safety": 100}
         logging.info("Game created")
 
     def join(self, player_id):
@@ -34,34 +36,48 @@ class Game:
 
     def start(self):
         self.com.set_players(list([p.id for p in self.players]))
-        self.com.print_all("Game start")
+        self.com.print_all("Игра начинается!")
+        for p in self.players:
+            self.com.print_player(p.id, "Ваша игровая роль:\n" + translate_keys[p.role])
         self.current_round = self.rounds[0]
         self.announce_round()
         pass
 
     def announce_round(self):
         self.history[self.round_index] = []
-        self.com.print_all(f"Round {self.round_index} starts: " + self.current_round.get_round_description())
+        self.com.print_all(f"Ход номер {self.round_index}:\n" + self.current_round.get_round_description())
         for p in self.players:
             role_instruction = self.current_round.print_role_options(p.role)
             self.com.print_player(p.id, role_instruction)
 
     def round_results(self):
-        self.com.print_all("Round results: ")
+        self.com.print_all("Результаты хода: ")
 #        for p in self.history[self.moveCount]:
 #            self.com.print_all(str(p[0]) + ': ' + p[1]["text"])
         for stat, s_value in self.stats.items():
-            self.com.print_all(stat + " is " + str(s_value))
+            self.com.print_all(translate_keys[stat] + " становится " + str(s_value))
 
     def player_move(self, player_id, choice: int):
-        # TODO: check choice is valid
-        self.history[self.round_index].append([player_id, choice])
-        for p in self.players:
-            if p.id == player_id:
-                self.update_stats(p.role, p.iq, choice)
-        if len(self.history[self.round_index]) == len(self.players):
-            self.round_results()
-            self.advance_round()
+        if self.move_validation(player_id):
+            if choice in range(2):
+                self.history[self.round_index].append([player_id, choice])
+                for p in self.players:
+                    if p.id == player_id:
+                        self.update_stats(p.role, p.iq, choice)
+                if len(self.history[self.round_index]) == len(self.players):
+                    self.round_results()
+                    self.advance_round()
+        else:
+            self.com.print_player(player_id, "Пожалуйста, дождитесь соперника.")
+
+    def move_validation(self, player_id):
+        if not self.history:
+            return False
+        else:
+            for move in self.history[self.round_index]:
+                if move[0] == player_id:
+                    return False
+            return True
 
     def update_stats(self, p_role, p_iq, choice: int):
         for stat, increment in self.current_round.get_choice_stat(p_role, choice).items():
@@ -81,7 +97,9 @@ class Game:
         return self.round_index >= len(self.rounds)
 
     def finish(self):
-        self.com.print_all(f"Game is over. Result {self.stats}")
+        self.com.print_all(f"Игра завершена.\nНачать игру заново: /restart, присоединиться: /start\nРезультат:\n")
+        for stat, s_value in self.stats.items():
+            self.com.print_all(translate_keys[stat] + " : " + str(s_value))
 
     def load_game(self):
         dict_list = load_rounds()
