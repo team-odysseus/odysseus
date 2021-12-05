@@ -18,7 +18,11 @@ class Keyboard(object):
                     button_list.append(types.KeyboardButton(f'{column}',
                                                             request_contact=True))
                 elif not column == '-':
-                    button_list.append(types.InlineKeyboardButton(f'{column}',
+                    if j == 0:
+                        self.kb_table.add(types.InlineKeyboardButton(f'{column}',
+                                                                  callback_data=f'{table_type}{i}{j}'))
+                    else:
+                        button_list.append(types.InlineKeyboardButton(f'{column}',
                                                                   callback_data=f'{table_type}{i}{j}'))
                 else:
                     button_list.append(types.InlineKeyboardButton(f'{column}',
