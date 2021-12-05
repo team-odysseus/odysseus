@@ -37,3 +37,7 @@ gh repo clone team-odysseus/odysseus
 Запуск первой части:
 cd "путь_к_папке_с_проектом"/quiz
 python quizmain.py
+
+Запуск второй части:
+.env по образцу example.env.txt
+python3 cyber_krot_main.py
