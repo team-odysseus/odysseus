@@ -5,8 +5,10 @@ from game.player import Player
 from game.round import Round
 from game.csv_reader import load_rounds
 
-MAX_PLAYERS = 2
-translate_stats = {"safety": "Кибер-безопасность компании"}
+MAX_PLAYERS = 1
+translate_keys = {"safety": "Кибер-безопасность компании",
+                  role.ROLE_GOOD: "Сотрудник компании",
+                  role.ROLE_BAD: "Кибер-злодей"}
 
 
 class Game:
@@ -35,6 +37,8 @@ class Game:
     def start(self):
         self.com.set_players(list([p.id for p in self.players]))
         self.com.print_all("Игра начинается!")
+        for p in self.players:
+            self.com.print_player(p.id, "Ваша игровая роль:\n" + translate_keys[p.role])
         self.current_round = self.rounds[0]
         self.announce_round()
         pass
@@ -51,7 +55,7 @@ class Game:
 #        for p in self.history[self.moveCount]:
 #            self.com.print_all(str(p[0]) + ': ' + p[1]["text"])
         for stat, s_value in self.stats.items():
-            self.com.print_all(translate_stats[stat] + " становится " + str(s_value))
+            self.com.print_all(translate_keys[stat] + " становится " + str(s_value))
 
     def player_move(self, player_id, choice: int):
         # TODO: check choice is valid
@@ -83,7 +87,7 @@ class Game:
     def finish(self):
         self.com.print_all(f"Игра завершена.\nРезультат:\n")
         for stat, s_value in self.stats.items():
-            self.com.print_all(translate_stats[stat] + " : " + str(s_value))
+            self.com.print_all(translate_keys[stat] + " : " + str(s_value))
 
     def load_game(self):
         dict_list = load_rounds()
