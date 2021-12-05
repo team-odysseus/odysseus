@@ -62,7 +62,8 @@ class QuizMain(object):
             self.bot.send_message(message.from_user.id, "Выберите вопрос:", reply_markup=keyboard.get_instant())
             self.agents[message.from_user.id].user_data.id = message.from_user.id
             self.agents[message.from_user.id].user_data.name = message.from_user.username
-            self.agents[message.from_user.id].user_data.phone = message.from_user.json['contact']['phone_number']
+
+            self.agents[message.from_user.id].user_data.phone = message.json['contact']['phone_number']
             self.agents[message.from_user.id].user_data.time = datetime.datetime.now()
 
         @self.bot.callback_query_handler(func=lambda callback_data: True)
@@ -132,8 +133,8 @@ class QuizMain(object):
         msg += f"Ваш результат в игре: {self.agents[message.from_user.id].user_score} очков"
         self.bot.send_message(message.from_user.id, msg)
         time_elapsed = datetime.datetime.now() - self.agents[message.from_user.id].user_data.time
-        self.agents[message.from_user.id].user_data.time = time_elapsed
-        self.agents[message.from_user.id].user_data.score = self.agents[message.from_user.id].user_data.score
+        self.agents[message.from_user.id].user_data.time = str(time_elapsed)
+        self.agents[message.from_user.id].user_data.score = self.agents[message.from_user.id].user_score
         """ Warning! Save user data before delete """
         self.sc.add_data(self.agents[message.from_user.id].user_data)
         self.sc.save_data()

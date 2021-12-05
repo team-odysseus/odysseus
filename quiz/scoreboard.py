@@ -2,7 +2,7 @@ import os
 import pandas as pd
 from userclass import User
 
-__version_ = 0.0002
+__version_ = 0.0003
 
 class ScoreBoard(object):
     def __init__(self):
@@ -20,7 +20,14 @@ class ScoreBoard(object):
         pass
 
     def add_data(self, user_data: User):
-        score_row_df = pd.DataFrame(user_data, columns=self.columns)
+        score_row_df = pd.DataFrame({'user_id' : user_data.id,
+                                     'user_name': user_data.name,
+                                     'phone': user_data.phone,
+                                     'time': user_data.time,
+                                     'score': user_data.score
+                                     }
+                                    )
+
         self.score_df = self.score_df.append(score_row_df, ignore_index=True)
         self.score_df = self.score_df.sort_values('score')[self.score_len]
         pass

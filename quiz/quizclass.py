@@ -4,7 +4,7 @@ import pandas as pd
 from storage.database import LoadData
 from userclass import User
 
-__version_ = 0.0015
+__version_ = 0.0016
 
 
 class Quiz(object):
@@ -132,6 +132,7 @@ class Quiz(object):
         correct_answer_msg = q_a['correct'].item()
         if is_answer_correct:
             self.user_score += int(q_a.score.item())
+            self.user_data.score = self.user_score
         user_true_answer_num = self.current_answers_random_order[answer_num]
         user_answer_data: dict = {}
         answer_data = list()
