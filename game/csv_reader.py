@@ -16,28 +16,24 @@ def load_rounds():
     choice_d = dict()
 
     data = pd.read_csv('../tests/test_scenario.csv')
-
-    s_x, s_y = data.shape
-
-    print(s_x, s_y)
-    print(data.info())
-    mask = data.round_index == 1
-    t_data = 0
-    print(data[data.round_index == 1]['good.text'].iloc[1])
     for r_number in range(1, data.round_index.max()+1):
-        d = data[data.round_index == 1]
-        print(d.index)
+        d = data[data.round_index == r_number]
         for role_i in ROLE_GOOD, ROLE_BAD:
-            for choice_i in d.index:
-                choice_d[TEXT_KEY] = d[role_i+'.'+CHOISES_KEY+'.'+TEXT_KEY].iloc[choice_i]
-                choice_d[STAT_1_KEY] = d[role_i+'.'+CHOISES_KEY+'.'+STAT_1_KEY].iloc[choice_i]
-                choices_d.append(choice_d)
-            role_d[CHOISES_KEY] = choices_d
-            role_d[TEXT_KEY] = d[role_i+'.'+TEXT_KEY]
-            round_d[role_i] = role_d
-        round_d[COM_DESCR_KEY] = d.common_description.iloc[0]
-        scenario.append(round_d)
-    print(data.columns)
-    print(scenario)
+            for choice_i in range(d.index.min(), d.index.max()+1):
+                choice_d[TEXT_KEY] = d[role_i+'.'+CHOISES_KEY+'.'+TEXT_KEY][choice_i]
+                choice_d[STAT_1_KEY] = d[role_i+'.'+CHOISES_KEY+'.'+STAT_1_KEY][choice_i]
+                choices_d.append(dict(choice_d))
+                choice_d.clear()
+            role_d[CHOISES_KEY] = list(choices_d)
+            choices_d = []
+            role_d[TEXT_KEY] = d[role_i+'.'+TEXT_KEY][d.index.min()]
+            round_d[role_i] = dict(role_d)
+            role_d.clear()
+        round_d[COM_DESCR_KEY] = d.common_description[d.index.min()]
+        scenario.append(dict(round_d))
+        round_d.clear()
 
     return scenario
+
+if __name__ == "__main__":
+    print(load_rounds())
