@@ -4,13 +4,23 @@ import pandas as pd
 # from io import BytesIO
 from typing import Tuple
 from storage.database import LoadData
+from dataclasses import dataclass
+import datetime
 # from PIL import Image, ImageDraw, ImageFont
 
 __version_ = 0.0013
 
+@dataclass
+class User:
+    id: int = 0
+    name: str = ''
+    phone: str = ''
+    time = datetime.datetime.now()
+    score: int = 0
 
 class Quiz(object):
     def __init__(self, categories_num: int = 5):
+        self.user_data = User
         self.ld = LoadData()
         self.questions_num = 4
         self.categories_num: int = categories_num
