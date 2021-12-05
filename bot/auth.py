@@ -3,19 +3,17 @@ import logging
 from telegram import (
     KeyboardButton,
     ReplyKeyboardMarkup,
-    ReplyKeyboardRemove,
     Update)
 
-from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters,
-                          ConversationHandler)
+from telegram.ext import (MessageHandler, Filters)
 
 import bot.bot
 
 NO_RIGHTS, DENIED, PLAY_RIGHTS, ADMIN_RIGHTS = range(4)
-rights_text = { NO_RIGHTS: "не определено",
-                DENIED: "нет доступа",
-                PLAY_RIGHTS: "игрок",
-                ADMIN_RIGHTS: "администратор"}
+rights_text = {NO_RIGHTS: "не определено",
+               DENIED: "нет доступа",
+               PLAY_RIGHTS: "игрок",
+               ADMIN_RIGHTS: "администратор"}
 
 
 class Auth:
