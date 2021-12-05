@@ -1,7 +1,6 @@
-import role
-
 TEXT_KEY = "text"
-CHOISES_KEY = "choices"
+CHOICES_KEY = "choices"
+
 
 class Round:
     def __init__(self, _dict=None):
@@ -25,15 +24,15 @@ class Round:
     def get_round_description(self):
         return self.config['common_description']
 
-    def get_role_choices(self, r_role:str):
-        return [c for c in iter(self.config[r_role][CHOISES_KEY]) if c != TEXT_KEY]
+    def get_role_choices(self, r_role: str):
+        return [c for c in iter(self.config[r_role][CHOICES_KEY]) if c != TEXT_KEY]
 
     def get_role_text(self, r_role: str):
         return self.config[r_role][TEXT_KEY]
 
     def print_role_options(self, r_role: str):
         choices = self.get_role_choices(r_role)
-        i = 1
+        i = 0
         choices_text = []
         for choice in choices:
             choices_text.append(str(i) + " : " + choice[TEXT_KEY])
@@ -41,6 +40,6 @@ class Round:
         return self.get_role_text(r_role) + " Your options: " + ", ".join(choices_text)
 
     def get_choice_stat(self, r_role, choice):
-        stats = self.config[r_role][CHOISES_KEY][choice]
+        stats = self.config[r_role][CHOICES_KEY][choice]
         stats.pop(TEXT_KEY)
         return stats
