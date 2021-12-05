@@ -15,7 +15,7 @@ def load_rounds():
     choices_d = []
     choice_d = dict()
 
-    data = pd.read_csv('../tests/test_scenario_2.csv')
+    data = pd.read_csv('tests/test_scenario_2.csv')
     for r_number in range(1, data.round_index.max()+1):
         d = data[data.round_index == r_number]
         for role_i in ROLE_GOOD, ROLE_BAD:
