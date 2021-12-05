@@ -3,27 +3,32 @@ from telebot import types
 
 
 class Keyboard(object):
-    def __init__(self):
-        self.kb_table = types.InlineKeyboardMarkup()
+    def __init__(self, view='InLine'):
+        if view == 'InLine':
+            self.kb_table = types.InlineKeyboardMarkup()
+        elif view == 'Reply':
+            self.kb_table = types.ReplyKeyboardMarkup()
         pass
 
     def fill_kb_table(self, table, table_type='table'):
         for i, row in enumerate(table):
             button_list = list()
             for j, column in enumerate(row):
-                if not column == '-':
+                if table_type == 'contact':
+                    button_list.append(types.KeyboardButton(f'{column}',
+                                                            request_contact=True))
+                elif not column == '-':
                     button_list.append(types.InlineKeyboardButton(f'{column}',
                                                                   callback_data=f'{table_type}{i}{j}'))
                 else:
                     button_list.append(types.InlineKeyboardButton(f'{column}',
                                                                   callback_data=f'none{i}{j}'))
             self.kb_table.row(*button_list)
-#        self.kb_table.add(types.InlineKeyboardButton('Закончить игру', callback_data='exit'))
+        #        self.kb_table.add(types.InlineKeyboardButton('Закончить игру', callback_data='exit'))
         pass
 
     def get_instant(self):
         return self.kb_table
-
 
 # def main():
 #     bot = telebot.TeleBot('1292821995:AAH-tyF6p0opLx9vtX4W69iC2z30sln9O3U');

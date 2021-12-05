@@ -17,6 +17,7 @@ class QuizMain(object):
         self.button_col_idx = 0
         """ 1. init bot logic """
         self.button_data_str, _ = self.quiz.create_rows_cols_pic_box()
+        self.quiz_id = 0
         pass
 
     def main(self):
@@ -27,22 +28,32 @@ class QuizMain(object):
             hello_msg = "Привет, я Одиссей, чат-бот созданный для обучения кибербезопасности. " \
                         "Мой тёзка придумал Троянского коня, а я помогу Вам защитится от троянов!\n" \
                         "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n\n" \
-                        "Для того чтобы мы могли вы могли начать сообщите свой контакт:"
+                        "Для того чтобы вы могли начать сообщите свой контакт:"
 
             if message.text == '/start':
-                keyboard = Keyboard()
-                keyboard.fill_kb_table(self.button_data_str)
-                self.bot.send_message(message.from_user.id, hello_msg)
-                self.bot.send_message(message.from_user.id, '_', reply_markup=keyboard.get_instant())
-            if message.text == '/rm':
-                self.bot.send_message(message.from_user.id, "rm", reply_markup=types.ReplyKeyboardRemove())
+                keyboard = Keyboard('Reply')
+                keyboard.fill_kb_table([['Отправить контакт']], 'contact')
+     #           self.bot.send_message(message.from_user.id, hello_msg)
+                self.bot.send_message(message.from_user.id, hello_msg, reply_markup=keyboard.get_instant())
+                self.bot.register_next_step_handler(message, get_number)
+#            if message.text == '/rm':
+#                self.bot.send_message(message.from_user.id, "rm", reply_markup=types.ReplyKeyboardRemove())
             pass
+
+        def get_number(message):
+            print(message)
+            keyboard = Keyboard()
+            keyboard.fill_kb_table(self.button_data_str)
+            self.bot.send_message(message.from_user.id, "_", reply_markup=types.ReplyKeyboardRemove())
+            self.bot.send_message(message.from_user.id, "_", reply_markup=keyboard.get_instant())
+
 
         @self.bot.callback_query_handler(func=lambda callback_data: True)
         def callback_worker(callback_data):
             print(callback_data.data)
             keyboard = Keyboard()
             keyboard.fill_kb_table(self.button_data_str)
+#            self.bot.send_photo(callback_data.message.chat.id, photo=self.quiz.get_board_pic(self.button_data_str))
             if callback_data.data.startswith('table'):
                 code = callback_data.data[-2:]
                 print(code)
@@ -69,19 +80,22 @@ class QuizMain(object):
                           f"Ваш ответ: {user_answer_msg}\n" \
                           f"Правильный ответ: {correct_answer_msg}"
                     self.bot.send_message(callback_data.message.chat.id, msg)
-                    self.bot.send_message(callback_data.message.chat.id,'_', reply_markup=keyboard.get_instant())
+                    self.bot.send_message(callback_data.message.chat.id, '_', reply_markup=keyboard.get_instant())
                 else:
                     msg = f"Это неправильный ответ! :\n" \
                           f"Ваш ответ: {user_answer_msg}\n" \
                           f"Правильный ответ: {correct_answer_msg}"
                     self.bot.send_message(callback_data.message.chat.id, msg)
-                    self.bot.send_message(callback_data.message.chat.id,'_', reply_markup=keyboard.get_instant())
+                    self.bot.send_message(callback_data.message.chat.id, '_', reply_markup=keyboard.get_instant())
                 if self.quiz.end_game_flag:
                     self.end_of_the_game(callback_data)
             elif callback_data.data == 'exit':
                 self.quiz.end_game_flag = True
                 self.end_of_the_game(callback_data)
-            pass
+            elif callback_data.data == 'contact':
+
+                pass
+
 
 
         def show_question_and_answers(callback_data):
