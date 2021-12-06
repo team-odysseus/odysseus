@@ -1,10 +1,11 @@
+import datetime
 import random
 import numpy as np
 import pandas as pd
 from database import LoadData
 from userclass import User
 
-__version_ = 0.0017
+__version__ = 0.0019
 
 
 class Quiz(object):
@@ -38,7 +39,8 @@ class Quiz(object):
         self.end_game_flag = False
         self.choose_categories()
         self.prepare_questions()
-        self.status = 0 #0 - name, 1 - table, 2 - answer,
+        self.status = 0         #0 - name, 1 - table, 2 - answer,
+        self.last_callback: object = object
         pass
 
     def get_one_cat_questions(self, cat_num):

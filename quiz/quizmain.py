@@ -1,22 +1,21 @@
 import os
-
+import time
+import logging
+import threading
+import datetime
+import telebot
 import telebot.apihelper
+from telebot import types
 
 from quizclass import Quiz
 from keyboard import Keyboard
 from scoreboard import ScoreBoard
-import telebot
-from telebot import types
-import datetime
-import logging
 
-__version__ = 0.0011
 
-logging.basicConfig(format='%(asctime)s - %(message)s', level=logging.INFO)
+__version__ = 0.0015
+
 STORAGE_PATH = os.getcwd()
-logging.FileHandler(os.path.join(STORAGE_PATH, 'log.log'))
-
-
+log_filepath = os.path.join(STORAGE_PATH, 'log.log')
 
 class QuizMain(object):
     def __init__(self):
@@ -26,18 +25,59 @@ class QuizMain(object):
         self.message_to_send = str()
         self.button_row_idx = 0
         self.button_col_idx = 0
-        self.sc = ScoreBoard()
+        self.scoreboard = ScoreBoard()
         self.hello_msg = "Привет, я Одиссей, чат-бот созданный для обучения кибербезопасности. " \
                          "Я помогу Вам защитится от троянов!\n" \
                          "Отвечайте на вопросы, а мы поможем вам улучшить ваши знания в этой области\n\n" \
                          "Для того чтобы вы могли начать сообщите свой контакт нажав на кноку внизу "
+        self.logger = self.get_logger()
+        self.watchdog_timer = 60
+        self.watchdog = threading.Thread(target=self.watchdog_envelope(),
+                                         name="inactivity_watchdog",
+                                         args=(15, self.logger),
+                                         # daemon=True
+                                         )
+
+        pass
+
+    @staticmethod
+    def get_logger():
+        logger = logging.getLogger("bot log")
+        logger.setLevel(logging.DEBUG)
+        fh = logging.FileHandler(log_filepath)
+        fmt = '%(asctime)s - %(threadName)s - %(levelname)s - %(message)s'
+        formatter = logging.Formatter(fmt)
+        fh.setFormatter(formatter)
+        logger.addHandler(fh)
+        return logger
+
+    def inactivity_watchdog(self):
+        self.logger.info(f'MSG : inactivity timeout -> start checking')
+        for user_id in self.agents.keys():
+            inactivity_treshold = self.agents[user_id].user_data.last_user_activity + self.agents[
+                user_id].user_data.user_activity_treshhold
+            if inactivity_treshold < datetime.datetime.now():
+                msg = f"Ввиду отсутствия вас в игре более {self.agents[user_id].user_data.user_activity_treshhold} минут," \
+                      f"\n игра закончена. Ознакомьтесь с вашим результатом!\n"
+                msg += f"{self.end_of_game_score(user_id)}"
+                self.logger.info(f'MSG : {user_id} : inactivity timeout')
+                self.end_of_the_game(self.agents[user_id].last_callback)
+            else:
+                self.logger.info(f'MSG : {user_id} inactivity timeout -> ok')
+        pass
+
+    def watchdog_envelope(self):
+        while True:
+            self.inactivity_watchdog()
+            time.sleep(self.watchdog_timer)
         pass
 
     def main(self):
-
         @self.bot.message_handler(commands=['start', 'help', 'board', 'exit'])
         def process_start_command(message):
-            logging.info(f'MSG : {message.from_user.id} : {message.text}')
+
+            """ Logging """
+            self.logger.info(f'MSG : {message.from_user.id} : {message.text}')
 
             if message.text == '/start':
                 if not (message.from_user.id in self.agents):
@@ -47,7 +87,8 @@ class QuizMain(object):
                     self.bot.send_message(message.from_user.id, self.hello_msg, reply_markup=keyboard.get_instant())
                     self.bot.register_next_step_handler(message, get_number)
                 else:
-                    self.bot.send_message(message.from_user.id, 'Прежде чем начать заново закончите текущую сессию /exit')
+                    self.bot.send_message(message.from_user.id,
+                                          'Прежде чем начать заново закончите текущую сессию /exit')
                     return
             elif message.text == '/help':
                 help_msg = "Доступные команды: \n" \
@@ -57,18 +98,26 @@ class QuizMain(object):
                            "/exit - прервать сессию."
                 self.bot.send_message(message.from_user.id, help_msg)
             elif message.text == '/board':
-                score_msg = self.sc.get_hiscore()
+                score_msg = self.scoreboard.get_hiscore()
                 self.bot.send_message(message.from_user.id, score_msg)
-                pass
+
+                """ Save last activity time and callback/message """
+                self.agents[message.from_user.id].user_data.last_user_activity = datetime.datetime.now()
+                self.agents[message.from_user.id].user_data.last_callback = message
+
             elif message.text == '/exit':
                 if message.from_user.id in self.agents.keys():
                     self.agents[message.from_user.id].end_game_flag = True
+                    """ Save last activity time and callback/message """
+                    self.agents[message.from_user.id].user_data.last_user_activity = datetime.datetime.now()
+                    self.agents[message.from_user.id].user_data.last_callback = message
                     self.end_of_the_game(message)
+
             pass
 
         def get_number(message):
-            # LOG:
-            logging.info(f'MSG : {message.from_user.id} : {message.text}')
+            """ Logging """
+            self.logger.info(f'MSG : {message.from_user.id} : {message.text}')
 
             if message.text is not None:
                 keyboard = Keyboard('Reply')
@@ -87,14 +136,22 @@ class QuizMain(object):
                 self.agents[message.from_user.id].user_data.phone = message.json['contact']['phone_number']
                 self.agents[message.from_user.id].user_data.time = datetime.datetime.now()
 
+                """ Save last activity time and callback/message """
+                self.agents[message.from_user.id].user_data.last_user_activity = datetime.datetime.now()
+                self.agents[message.from_user.id].user_data.last_callback = message
+                pass
+
         @self.bot.callback_query_handler(func=lambda callback_data: True)
         def callback_worker(callback_data):
-            # LOG:
-            logging.info(f'CALLBACK : {callback_data.from_user.id} : {callback_data.data}')
+            """ Logging """
+            self.logger.info(f'CALLBACK : {callback_data.from_user.id} : {callback_data.data}')
             if callback_data.from_user.id not in self.agents:
                 self.bot.send_message(callback_data.message.chat.id, "Начните с /start  !")
                 return
+
             if callback_data.data.startswith('table'):
+                """ Save last activity time """
+                self.agents[callback_data.from_user.id].user_data.last_user_activity = datetime.datetime.now()
                 if self.agents[callback_data.from_user.id].status != 1:
                     self.bot.send_message(callback_data.message.chat.id, "Выберите ответ на вопрос!")
                     return
@@ -108,7 +165,6 @@ class QuizMain(object):
                     self.agents[callback_data.from_user.id].status = 2
                     show_question_and_answers(callback_data)
                 self.bot.answer_callback_query(callback_data.id)
-                pass
             elif callback_data.data.startswith('answer'):
                 if self.agents[callback_data.from_user.id].status != 2:
                     self.bot.send_message(callback_data.message.chat.id, "Выберите категорию и цену вопроса!")
@@ -140,6 +196,7 @@ class QuizMain(object):
                 self.agents[callback_data.from_user.id].status = 1
                 if self.agents[callback_data.from_user.id].end_game_flag:
                     self.end_of_the_game(callback_data)
+            pass
 
         def show_question_and_answers(callback_data):
             question_msg, answers_list = self.agents[callback_data.from_user.id].get_question_and_answers(
@@ -150,27 +207,36 @@ class QuizMain(object):
                                   f"Вопрос №{self.agents[callback_data.message.chat.id].questions_count}\n{question_msg}",
                                   reply_markup=kb.get_instant())
             pass
-
+        self.watchdog.start()
         self.bot.polling(none_stop=True, interval=1)
         pass
 
-    def end_of_the_game(self, message):
-        msg = "Поздравляем!\n"
-        count_questions_in_game = self.agents[message.from_user.id].q_a_matrix_rows * self.agents[
-            message.from_user.id].q_a_matrix_cols
-        if self.agents[message.from_user.id].questions_count == count_questions_in_game:
+    def end_of_game_score(self, user_id):
+        msg = str()
+        count_questions_in_game = self.agents[user_id].q_a_matrix_rows * self.agents[user_id].q_a_matrix_cols
+        if self.agents[user_id].questions_count == count_questions_in_game:
             msg += "Вы ответили на все вопросы в игре!\n"
         else:
-            msg += f"Вы ответили на {self.agents[message.from_user.id].questions_count} из {count_questions_in_game} вопросов!\n" \
+            msg += f"Вы ответили на {self.agents[user_id].questions_count} из {count_questions_in_game} вопросов!\n" \
                    "Чтобы набрать больше баллов отвечайте на все вопросы.\n"
-        msg += f"Ваш результат в игре: {self.agents[message.from_user.id].user_score} очков"
+        msg += f"Ваш результат в игре: {self.agents[user_id].user_score} очков"
+
+        """ Logging """
+        self.logger.info(f'END_OF_GAME : {user_id} : score = {self.agents[user_id].user_score}')
+        return msg
+
+    def end_of_the_game(self, message):
+        msg = "Поздравляем!\n"
+        msg += f"{self.end_of_game_score(message.from_user.id)}"
+
         self.bot.send_message(message.from_user.id, msg)
         time_elapsed = datetime.datetime.now() - self.agents[message.from_user.id].user_data.time
         self.agents[message.from_user.id].user_data.time = str(time_elapsed)
         self.agents[message.from_user.id].user_data.score = self.agents[message.from_user.id].user_score
+
         """ Warning! Save user data before delete """
-        self.sc.add_data(self.agents[message.from_user.id].user_data)
-        self.sc.save_data()
+        self.scoreboard.add_data(self.agents[message.from_user.id].user_data)
+        self.scoreboard.save_data()
         self.agents.pop(message.from_user.id)
         pass
 
